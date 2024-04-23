@@ -60,7 +60,7 @@ def process_message(request_data):
                                                     f"{chat_prefix} admin ban <add|rm> <QQ 号> - 禁用或解禁用户\n"
                                                     f"{chat_prefix} admin forcelogout <QQ 号> - 强制登出 QQ 对应的学生账号\n"
                                                     f"{chat_prefix} admin examxlsx <考试ID> - 获取考试成绩单\n"
-                                                    f"{chat_prefix} admin examanswersheet <学生ID> <考试ID> - 获取考试答题卡\n")
+                                                    f"{chat_prefix} admin examanswersheet <id|name> <学生ID> <考试ID> - 获取考试答题卡\n")
                 return
 
             elif message.startswith("login"):
@@ -191,11 +191,11 @@ def process_message(request_data):
                 elif message.startswith("examanswersheet"):
                     message = message[len("examanswersheet") + 1:].strip()
                     method, stuid, examid = message.split(" ", 3)
-                    if method == "stuid":
+                    if method == "id":
                         file_paths = zhixue.get_answersheet_by_stuid(stuid, examid)
                         for file_path in file_paths:
                             send_private_img(sender_id, f"file://{os.path.abspath(file_path)}")
-                    elif method == "stuname":
+                    elif method == "name":
                         file_paths = zhixue.get_answersheet_by_stuname(stuid, sender_id, examid)
                         for file_path in file_paths:
                             send_private_img(sender_id, f"file://{os.path.abspath(file_path)}")
