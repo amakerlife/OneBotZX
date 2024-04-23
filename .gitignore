@@ -1,0 +1,6 @@
+.vscode
+.zx
+venv
+.idea
+__pycache__
+config.yml
