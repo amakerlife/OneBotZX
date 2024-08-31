@@ -167,7 +167,7 @@ def get_rank_by_stu_code(qqid, exam_id):  # TODO: 使用全部排行榜计算排
     stu_school = stu_list[qqid].clazz.school.id
     global tch_list
     if stu_school not in tch_list:
-        raise FailedGetTeacherAccountError(qqid)
+        raise FailedGetTeacherAccountError
     tch_list[stu_school]=update_login_status_self(tch_list[stu_school])
     tch = tch_list[stu_school]
     global exam_scores_by_stu
@@ -194,7 +194,7 @@ def get_exam_rank(qqid, exam_id: str):
     stu_school = stu_list[qqid].clazz.school.id
     global tch_list
     if stu_school not in tch_list:
-        raise FailedGetTeacherAccountError(qqid)
+        raise FailedGetTeacherAccountError
     tch_list[stu_school] = update_login_status_self(tch_list[stu_school])
     tch = tch_list[stu_school]
     wb = Workbook()
@@ -231,7 +231,7 @@ def get_answersheet_by_stuid(qqid, stu_id, examid):
     stu_school = stu_list[qqid].clazz.school.id
     global tch_list
     if stu_school not in tch_list:
-        raise FailedGetTeacherAccountError(qqid)
+        raise FailedGetTeacherAccountError
     tch_list[stu_school] = update_login_status_self(tch_list[stu_school])
     tch = tch_list[stu_school]
     subject_list = get_exam_subjects(tch, examid)
@@ -255,7 +255,7 @@ def get_answersheet_by_stuname(stu_name, qqid, examid):
     stu_school = stu_list[qqid].clazz.school.id
     global tch_list
     if stu_school not in tch_list:
-        raise FailedGetTeacherAccountError(qqid)
+        raise FailedGetTeacherAccountError
     tch_list[stu_school] = update_login_status_self(tch_list[stu_school])
     tch = tch_list[stu_school]
     stu, status = get_user(qqid)
