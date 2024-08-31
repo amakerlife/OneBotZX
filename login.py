@@ -48,18 +48,15 @@ def get_session_by_captcha(username: str, password: str) -> requests.Session:
 
     # 获取验证码
     logger.info("Getting captcha")
+    captcha_data = None
     for attempt in range(MAX_RETRIES):
-        try:
-            captcha_data = session.get("http://54.169.202.224:8080/get_geetest", timeout=5).json()["data"]
+        captcha_data = session.get("http://54.169.202.224:8080/get_geetest", timeout=5).json()["data"]
+        if captcha_data["result"] == "success":
             break
-        except requests.exceptions.RequestException:
-            if attempt == MAX_RETRIES - 1:
-                logger.error(f"Failed to get captcha after {MAX_RETRIES} attempts")
-                send_private_message(337249336, "验证码获取失败。")
-                raise LoginCaptchaError(f"Failed to get captcha after {MAX_RETRIES} attempts")
-    if captcha_data["result"] != "success":
-        logger.error("Failed to get captcha")
-        raise LoginError("Failed to get captcha")
+        if attempt == MAX_RETRIES - 1:
+            logger.error(f"Failed to get captcha after {MAX_RETRIES} attempts")
+            send_private_message(337249336, "验证码获取失败。")
+            raise LoginCaptchaError(f"Failed to get captcha after {MAX_RETRIES} attempts")
     login_url = "https://pass.changyan.com/login/checkLogin"
     # Zhixue URL: https://www.zhixue.com/edition/login?from=web_login
     data = {
