@@ -1,2 +1,0 @@
-class ZhixueError(Exception):
-    pass

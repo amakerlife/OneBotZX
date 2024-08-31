@@ -80,7 +80,6 @@ def process_message(request_data):
                         logger.warning(f"{sender_id} repeat login in: {info}")
                         send_private_message(sender_id, f"已登录智学网账号 {info}。")
                     elif status == 3:
-                        logger.debug(wait_for_login)
                         if sender_id in wait_for_login:
                             zhixue.logout_stu(wait_for_login[sender_id])
                             send_private_message(sender_id,
@@ -93,6 +92,8 @@ def process_message(request_data):
                         logger.warning(f"{sender_id} failed login in: {username}({info})")
                         send_private_message(sender_id, f"该智学网账号已被 QQ 号 {info} 占用，请再次登录以下线 {info}。")
                         wait_for_login[sender_id] = info
+                    elif status == 4:
+                        send_private_message(sender_id, "网络异常，请联系管理员。")
                 return
 
             elif message.startswith("logout"):
@@ -145,7 +146,7 @@ def process_message(request_data):
 
             elif message.startswith("admin"):
                 if int(sender_id) not in admins:
-                    send_private_message(sender_id, "您无权使用改指令。")
+                    send_private_message(sender_id, "您无权使用该指令。")
                     logger.warning(f"{sender_id} tried to use admin command: {message}")
                     return
                 logger.warning(f"Admin {sender_id} used admin command: {message}")

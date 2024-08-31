@@ -4,9 +4,10 @@ import time
 
 from loguru import logger
 from openpyxl import Workbook
-from zhixuewang import login_student, login_teacher
 from zhixuewang.models import StuPerson
-from modules import ZhixueError
+
+from login import update_login_status_self, login_by_captcha
+from models import ZhixueError, LoginCaptchaError
 
 from filesystem import save_cache, load_cache
 from teacher import get_school_rank_by_stu_code, get_exam_all_rank, get_exam_subjects, process_answersheet, \
@@ -20,7 +21,7 @@ stu_list = {}
 exam_scores_by_stu = {}
 exam_scores = {}
 
-tch = login_teacher(USERNAME_TEACHER, PASSWORD_TEACHER)
+tch = login_by_captcha(USERNAME_TEACHER, PASSWORD_TEACHER)
 
 
 def load_all_stu_list():
@@ -34,12 +35,12 @@ def get_user(qqid):
     Args:
         qqid: QQ 号
     Return:
-        StuPerson: 学生账号
+        StudentAccount: 学生账号
         bool: 是否存在
     """
     global stu_list
     if qqid in stu_list:
-        stu_list[qqid].update_login_status()
+        stu_list[qqid]=update_login_status_self(stu_list[qqid])
         return stu_list[qqid], True
     return None, False
 
@@ -55,9 +56,11 @@ def login_stu(qqid, username, password):
         Tuple: 登录是否成功
     """
     try:
-        stu = login_student(username, password)
+        stu = login_by_captcha(username, password)
     except Exception as e:
         logger.error(f"Failed to login student {username}: {e}")
+        if Exception == LoginCaptchaError:
+            return 4, None
         return 1, None
     global stu_list
     stu_list = load_cache("stu_list")
@@ -147,7 +150,8 @@ def get_exams(qqid):
 
 def get_rank_by_stu_code(qqid, exam_id):  # TODO: 使用全部排行榜计算排名
     """通过 stu_code 获得排名"""
-    tch.update_login_status()
+    global tch
+    tch=update_login_status_self(tch)
     global exam_scores_by_stu
     exam_scores_by_stu = load_cache("exam_scores")
     if exam_id not in exam_scores_by_stu or stu_list[qqid].code not in exam_scores_by_stu[exam_id]:
@@ -169,7 +173,8 @@ def get_rank_by_stu_code(qqid, exam_id):  # TODO: 使用全部排行榜计算排
 
 def get_exam_rank(exam_id: str):
     """获得成绩单"""
-    tch.update_login_status()
+    global tch
+    tch=update_login_status_self(tch)
     wb = Workbook()
     ws = wb.active
     subjects_list = get_exam_subjects(tch, exam_id)
@@ -201,7 +206,8 @@ def get_exam_rank(exam_id: str):
 
 def get_answersheet_by_stuid(stu_id, examid):
     """通过 student_id 获取答题卡"""
-    tch.update_login_status()
+    global tch
+    tch=update_login_status_self(tch)
     subject_list = get_exam_subjects(tch, examid)
     images = []
     for subject_code in subject_list:
@@ -220,7 +226,8 @@ def get_answersheet_by_stuid(stu_id, examid):
 
 def get_answersheet_by_stuname(stu_name, qqid, examid):
     """通过 学生姓名 获取答题卡"""
-    tch.update_login_status()
+    global tch
+    tch=update_login_status_self(tch)
     stu, status = get_user(qqid)
     if not status:
         return None
@@ -234,7 +241,8 @@ def get_answersheet_by_qqid(qqid, examid):
     stu, status = get_user(qqid)
     if not status:
         return None
-    tch.update_login_status()
+    global tch
+    tch=update_login_status_self(tch)
     stu_id = stu.id
     return get_answersheet_by_stuid(stu_id, examid)
 

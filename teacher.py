@@ -4,7 +4,7 @@ from time import sleep
 
 from zhixuewang.teacher import TeacherAccount
 from answersheet import draw_answersheet
-from modules import ZhixueError
+from models import ZhixueError
 
 from loguru import logger
 
