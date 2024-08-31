@@ -82,10 +82,13 @@ def process_message(request_data):
                     elif status == 3:
                         if sender_id in wait_for_login:
                             zhixue.logout_stu(wait_for_login[sender_id])
-                            send_private_message(sender_id,
-                                                 f"已下线 {wait_for_login.get(sender_id)} 的登录状态。请重新登录。"
-                                                 f"如果非本人操作，请及时修改密码。")
-                            send_private_message(wait_for_login[sender_id], f"您的智学网账号已被 {sender_id} 登录。"
+                            status = zhixue.login_stu(sender_id, username, password)
+                            if status == 0:
+                                send_private_message(sender_id,
+                                                 f"登录成功，已下线 {wait_for_login.get(sender_id)} 的登录状态。")
+                            else:
+                                send_private_message(sender_id, "登录失败。")
+                            send_private_message(wait_for_login[sender_id], f"您的智学网账号已被 {sender_id} 使用。"
                                                                             f"如果非本人操作，请及时修改密码。")
                             del wait_for_login[sender_id]
                             return

@@ -25,10 +25,17 @@ exam_scores = {}
 # tch = login_by_captcha(USERNAME_TEACHER, PASSWORD_TEACHER)
 
 for teacher_account in teacher_usernames:
-    if teacher_account not in tch_list:
+    for tch_school in tch_list:
+        if tch_list[tch_school].username == teacher_account:
+            break
+    else:
         tch_account = login_by_captcha(teacher_account, teacher_passwords[teacher_usernames.index(teacher_account)])
         tch_school = tch_account.school.id
         tch_list[tch_school] = tch_account
+    # if teacher_account not in tch_list:
+    #     tch_account = login_by_captcha(teacher_account, teacher_passwords[teacher_usernames.index(teacher_account)])
+    #     tch_school = tch_account.school.id
+    #     tch_list[tch_school] = tch_account
 save_cache("tch_list", tch_list)
 
 def load_all_stu_list():
@@ -62,6 +69,9 @@ def login_stu(qqid, username, password):
     Return:
         Tuple: 登录是否成功
     """
+    global stu_list
+    if qqid in stu_list:
+        return 2, stu_list[qqid].username
     try:
         stu = login_by_captcha(username, password)
     except Exception as e:
@@ -69,10 +79,7 @@ def login_stu(qqid, username, password):
         if Exception == LoginCaptchaError:
             return 4, None
         return 1, None
-    global stu_list
     stu_list = load_cache("stu_list")
-    if qqid in stu_list:
-        return 2, stu_list[qqid].username
     for qqid_, stu_ in stu_list.items():
         if stu_.id == stu.id:
             return 3, qqid_
