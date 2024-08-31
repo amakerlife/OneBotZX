@@ -14,15 +14,22 @@ from teacher import get_school_rank_by_stu_code, get_exam_all_rank, get_exam_sub
     get_stuid_by_stuname
 from config import zhixue_config
 
-USERNAME_TEACHER = zhixue_config.teacher_account
-PASSWORD_TEACHER = zhixue_config.teacher_password
+teacher_usernames = zhixue_config.teacher_accounts
+teacher_passwords = zhixue_config.teacher_passwords
 
 stu_list = {}
+tch_list = load_cache("tch_list")
 exam_scores_by_stu = {}
 exam_scores = {}
 
-tch = login_by_captcha(USERNAME_TEACHER, PASSWORD_TEACHER)
+# tch = login_by_captcha(USERNAME_TEACHER, PASSWORD_TEACHER)
 
+for teacher_account in teacher_usernames:
+    if teacher_account not in tch_list:
+        tch_account = login_by_captcha(teacher_account, teacher_passwords[teacher_usernames.index(teacher_account)])
+        tch_school = tch_account.school.id
+        tch_list[tch_school] = tch_account
+save_cache("tch_list", tch_list)
 
 def load_all_stu_list():
     global stu_list
@@ -150,8 +157,12 @@ def get_exams(qqid):
 
 def get_rank_by_stu_code(qqid, exam_id):  # TODO: 使用全部排行榜计算排名
     """通过 stu_code 获得排名"""
-    global tch
-    tch=update_login_status_self(tch)
+    stu_school = stu_list[qqid].clazz.school.id
+    global tch_list
+    if stu_school not in tch_list:
+        raise ZhixueError("Failed to get teacher account")
+    tch_list[stu_school]=update_login_status_self(tch_list[stu_school])
+    tch = tch_list[stu_school]
     global exam_scores_by_stu
     exam_scores_by_stu = load_cache("exam_scores")
     if exam_id not in exam_scores_by_stu or stu_list[qqid].code not in exam_scores_by_stu[exam_id]:
@@ -171,10 +182,14 @@ def get_rank_by_stu_code(qqid, exam_id):  # TODO: 使用全部排行榜计算排
         return returns
 
 
-def get_exam_rank(exam_id: str):
+def get_exam_rank(qqid, exam_id: str):
     """获得成绩单"""
-    global tch
-    tch=update_login_status_self(tch)
+    stu_school = stu_list[qqid].clazz.school.id
+    global tch_list
+    if stu_school not in tch_list:
+        raise ZhixueError("Failed to get teacher account")
+    tch_list[stu_school] = update_login_status_self(tch_list[stu_school])
+    tch = tch_list[stu_school]
     wb = Workbook()
     ws = wb.active
     subjects_list = get_exam_subjects(tch, exam_id)
@@ -204,10 +219,14 @@ def get_exam_rank(exam_id: str):
     return file_name
 
 
-def get_answersheet_by_stuid(stu_id, examid):
+def get_answersheet_by_stuid(qqid, stu_id, examid):
     """通过 student_id 获取答题卡"""
-    global tch
-    tch=update_login_status_self(tch)
+    stu_school = stu_list[qqid].clazz.school.id
+    global tch_list
+    if stu_school not in tch_list:
+        raise ZhixueError("Failed to get teacher account")
+    tch_list[stu_school] = update_login_status_self(tch_list[stu_school])
+    tch = tch_list[stu_school]
     subject_list = get_exam_subjects(tch, examid)
     images = []
     for subject_code in subject_list:
@@ -226,14 +245,18 @@ def get_answersheet_by_stuid(stu_id, examid):
 
 def get_answersheet_by_stuname(stu_name, qqid, examid):
     """通过 学生姓名 获取答题卡"""
-    global tch
-    tch=update_login_status_self(tch)
+    stu_school = stu_list[qqid].clazz.school.id
+    global tch_list
+    if stu_school not in tch_list:
+        raise ZhixueError("Failed to get teacher account")
+    tch_list[stu_school] = update_login_status_self(tch_list[stu_school])
+    tch = tch_list[stu_school]
     stu, status = get_user(qqid)
     if not status:
         return None
     classid = stu.get_clazz().id
     stu_id = get_stuid_by_stuname(tch, examid, classid, stu_name)
-    return get_answersheet_by_stuid(stu_id, examid)
+    return get_answersheet_by_stuid(qqid, stu_id, examid)
 
 
 def get_answersheet_by_qqid(qqid, examid):
@@ -241,10 +264,7 @@ def get_answersheet_by_qqid(qqid, examid):
     stu, status = get_user(qqid)
     if not status:
         return None
-    global tch
-    tch=update_login_status_self(tch)
-    stu_id = stu.id
-    return get_answersheet_by_stuid(stu_id, examid)
+    return get_answersheet_by_stuid(qqid, stu.id, examid)
 
 
 # def get_original_paper(qqid, exam_id, subj_id):

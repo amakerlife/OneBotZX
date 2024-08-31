@@ -47,9 +47,10 @@ def get_session_by_captcha(username: str, password: str) -> requests.Session:
     session = get_basic_session()
 
     # 获取验证码
+    logger.info("Getting captcha")
     for attempt in range(MAX_RETRIES):
         try:
-            captcha_data = session.get("http://http://54.169.202.224:8080/get_geetest", timeout=5).json()["data"]
+            captcha_data = session.get("http://54.169.202.224:8080/get_geetest", timeout=5).json()["data"]
             break
         except requests.exceptions.RequestException:
             if attempt == MAX_RETRIES - 1:

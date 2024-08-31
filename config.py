@@ -21,9 +21,9 @@ class MessageConfig:
 
 
 class ZhixueConfig:
-    def __init__(self, teacher_account: str, teacher_password: str):
-        self.teacher_account = teacher_account
-        self.teacher_password = teacher_password
+    def __init__(self, teacher_accounts: list[str], teacher_passwords: list[str]):
+        self.teacher_accounts = teacher_accounts
+        self.teacher_passwords = teacher_passwords
 
 
 with open(config_path, "r", encoding="utf-8") as file:

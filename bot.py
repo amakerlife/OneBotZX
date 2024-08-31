@@ -184,7 +184,7 @@ def process_message(request_data):
                         send_private_message(sender_id, "登出失败，疑似未登录智学网账号。")
                 elif message.startswith("examxlsx"):
                     examid = message.split(" ", 2)[1]
-                    file_path = zhixue.get_exam_rank(examid)
+                    file_path = zhixue.get_exam_rank(sender_id, examid)
                     if file_path:
                         send_private_file(sender_id, f"file://{os.path.abspath(file_path)}")
                     else:
@@ -193,7 +193,7 @@ def process_message(request_data):
                     message = message[len("examanswersheet") + 1:].strip()
                     method, stuid, examid = message.split(" ", 3)
                     if method == "id":
-                        file_paths = zhixue.get_answersheet_by_stuid(stuid, examid)
+                        file_paths = zhixue.get_answersheet_by_stuid(sender_id, stuid, examid)
                         for file_path in file_paths:
                             send_private_img(sender_id, f"file://{os.path.abspath(file_path)}")
                     elif method == "name":
