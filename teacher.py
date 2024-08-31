@@ -4,7 +4,7 @@ from time import sleep
 
 from zhixuewang.teacher import TeacherAccount
 from answersheet import draw_answersheet
-from models import ZhixueError
+from modules import ZhixueError
 
 from loguru import logger
 
@@ -205,7 +205,7 @@ def get_exam_all_rank(myaccount: TeacherAccount, examid: str) -> List:
     return students_list
 
 
-def get_answersheet_data(myaccount: TeacherAccount, subjectid: str, stuid: str):
+def get_answersheet_data(myaccount: TeacherAccount, subjectid: str, stuid: str):  # FIXME: 某些答题卡数据格式不同
     """
     获取答题卡数据
     Args:
@@ -241,6 +241,8 @@ def get_answersheet_data(myaccount: TeacherAccount, subjectid: str, stuid: str):
             flag = False
             for content in section["contents"]["branch"]:
                 position = content["position"]
+                if position == "":
+                    break
                 if (flag or position["left"] <= 0 or position["top"] <= 0 or position["left"] < out_left or
                         position["top"] < out_top):
                     position["left"] += out_left
@@ -304,7 +306,7 @@ def process_answersheet(myaccount: TeacherAccount, subjectid: str, stuid: str):
     return image
 
 
-def get_stuid_by_stuname(myaccount: TeacherAccount, examid: str, classid: str, stuname: str) -> str:
+def get_stuid_by_stuname(myaccount: TeacherAccount, examid: str, classid: str, stuname: str) -> str:  # XXX: 适配无法获取的情况
     """
     根据学生姓名、examid 和 classid 获取学生 ID
     Args:

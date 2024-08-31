@@ -6,12 +6,14 @@ from loguru import logger
 from config import onebot_config
 
 http_url = onebot_config.http_url
+access_token = onebot_config.access_token
 
 
 def send_private_message(user_id, content):
     url = f"{http_url}/send_private_msg"
     headers = {
         "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}",
     }
     data = {
         "user_id": user_id,
@@ -40,6 +42,7 @@ def send_group_message(group_id, sender_id, content):
     url = f"{http_url}/send_group_msg"
     headers = {
         "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}",
     }
     data = {
         "group_id": group_id,
@@ -72,6 +75,7 @@ def send_private_img(user_id, content):
     url = f"{http_url}/send_private_msg"
     headers = {
         "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}",
     }
     data = {
         "user_id": user_id,
@@ -100,6 +104,7 @@ def send_group_img(group_id, sender_id, content):
     url = f"{http_url}/send_group_msg"
     headers = {
         "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}",
     }
     data = {
         "group_id": group_id,
@@ -132,6 +137,7 @@ def send_private_file(user_id, file_path):
     url = f"{http_url}/send_private_msg"
     headers = {
         "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}",
     }
     data = {
         "user_id": user_id,

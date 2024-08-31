@@ -3,7 +3,7 @@ from io import BytesIO
 import requests
 from PIL import Image, ImageDraw, ImageFont
 
-from models import ZhixueError
+from modules import ZhixueError
 
 
 def get_size(text, font):

@@ -9,8 +9,9 @@ class ConfigError(Exception):
 
 
 class OnebotConfig:
-    def __init__(self, http_url: str):
+    def __init__(self, http_url: str, access_token: str):
         self.http_url = http_url
+        self.access_token = access_token
 
 
 class MessageConfig:

@@ -6,7 +6,7 @@ from loguru import logger
 from openpyxl import Workbook
 from zhixuewang import login_student, login_teacher
 from zhixuewang.models import StuPerson
-from models import ZhixueError
+from modules import ZhixueError
 
 from filesystem import save_cache, load_cache
 from teacher import get_school_rank_by_stu_code, get_exam_all_rank, get_exam_subjects, process_answersheet, \
