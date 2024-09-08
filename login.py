@@ -14,6 +14,12 @@ from zhixuewang.urls import Url
 from models import LoginCaptchaError
 from msg import send_private_message
 
+from config import zhixue_config
+
+teacher_accounts = zhixue_config.teacher_accounts
+teacher_login_method = zhixue_config.teacher_login_method
+
+
 MAX_RETRIES = 5
 
 def gen_encrypted_password(password):
@@ -132,16 +138,32 @@ def get_session_by_captcha(username: str, password: str) -> requests.Session:
     origin_password = password
     password = gen_encrypted_password(password)
     session = get_basic_session()
-    try:
-        captcha_data = gen_captcha_data(session)
-        captcha_id, session = login_via_zhixue(username, origin_password, captcha_data, session)
-    except LoginError:
+    login_method = "changyan"
+    for account in teacher_accounts:
+        if account == username:
+            login_method = teacher_login_method[teacher_accounts.index(account)]
+    if login_method == "zhixue":
+        try:
+            captcha_data = gen_captcha_data(session)
+            captcha_id, session = login_via_zhixue(username, password, captcha_data, session)
+        except LoginError:
+            try:
+                captcha_data = gen_captcha_data(session)
+                captcha_id, session = login_via_changyan(username, origin_password, captcha_data, session)
+            except LoginError as e:
+                logger.info(f"Failed to login(web): {e}")
+                raise e
+    else:
         try:
             captcha_data = gen_captcha_data(session)
             captcha_id, session = login_via_changyan(username, password, captcha_data, session)
-        except LoginError as e:
-            logger.info(f"Failed to login(web): {e}")
-            raise e
+        except LoginError:
+            try:
+                captcha_data = gen_captcha_data(session)
+                captcha_id, session = login_via_zhixue(username, origin_password, captcha_data, session)
+            except LoginError as e:
+                logger.info(f"Failed to login(web): {e}")
+                raise e
 
     # login_url = "https://pass.changyan.com/login/checkLogin"
     # Zhixue URL: https://www.zhixue.com/edition/login?from=web_login

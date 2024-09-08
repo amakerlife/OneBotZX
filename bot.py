@@ -24,7 +24,7 @@ def handle_request():
     if request_data.get("post_type") == "request" and request_data.get("request_type") == "friend":
         process_friend_request(request_data)
 
-    if request_data.get("post_type") == "message":
+    if request_data.get("post_type") == "message" or request_data.get("post_type") == "message_sent":
         process_message(request_data)
 
     return '', 204
@@ -63,10 +63,11 @@ def process_message(request_data):
                                                 f"{chat_prefix} help - 获取帮助信息\n"
                                                 f"\n提醒：提供的密码仅用于验证身份及获取数据。登录完成后您可以立即撤回密码。\n"
                                                 f"例如，使用 /zx login abcd 1234 来登录。\n"
+                                                f"若在自后使用时发现机器人状态为离线，请联系管理员 3372493336 解决。\n"
                                                 f"使用本机器人即表示您同意遵守相关规定，并为使用本机器人的所有行为负责。")
                 if int(sender_id) in admins:
                     send_private_message(sender_id, f"欢迎您，管理员 {sender_id}：\n"
-                                                    f"{chat_prefix} admin rm data <stu_list|exam_scores|all> - 清除缓存数据\n"
+                                                    f"{chat_prefix} admin rm data <stu_list|tch_list|exam_scores|all> - 清除缓存数据\n"
                                                     f"{chat_prefix} admin rm cache - 清除缓存\n"
                                                     f"{chat_prefix} admin ban <add|rm> <QQ 号> - 禁用或解禁用户\n"
                                                     f"{chat_prefix} admin forcelogout <QQ 号> - 强制登出 QQ 对应的学生账号\n"
