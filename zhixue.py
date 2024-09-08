@@ -24,7 +24,7 @@ exam_scores = {}
 
 # tch = login_by_captcha(USERNAME_TEACHER, PASSWORD_TEACHER)
 
-for teacher_account in teacher_usernames:
+for teacher_account in teacher_usernames: # TODO: 自动维护（删除）不在配置文件中的账号
     for tch_school in tch_list:
         if tch_list[tch_school].username == teacher_account:
             break

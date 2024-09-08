@@ -6,7 +6,7 @@ from loguru import logger
 import zhixue
 from config import message_config
 from filesystem import load_ban_list, save_ban_list, clean_cache_data, clean_cache_file
-from msg import send_private_message, send_private_file, send_private_img
+from msg import send_private_message, send_private_file, send_private_img, approve_friend_request
 
 app = Flask(__name__)
 
@@ -21,11 +21,21 @@ ban_list = []
 def handle_request():
     request_data = request.get_json()
 
-    if not request_data.get("message"):
-        return '', 204
+    if request_data.get("post_type") == "request" and request_data.get("request_type") == "friend":
+        process_friend_request(request_data)
 
-    process_message(request_data)
+    if request_data.get("post_type") == "message":
+        process_message(request_data)
+
     return '', 204
+
+
+def process_friend_request(request_data):
+    flag = request_data.get("flag", "")
+    if approve_friend_request(flag):
+        logger.info(f"Approved friend request: {flag}")
+    else:
+        logger.warning(f"Failed to approve friend request: {flag}")
 
 
 def process_message(request_data):

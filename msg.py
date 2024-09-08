@@ -14,6 +14,31 @@ def truncate_string(s, length=30):
     else:
         return s
 
+
+def approve_friend_request(flag, approve=True):
+    url = f"{http_url}/set_friend_add_request"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}",
+    }
+    data = {
+        "flag": flag,
+        "approve": approve
+    }
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+    if response.status_code == 200:
+        result = response.json()
+        if result["status"] == "ok":
+            logger.success(f"Successfully approved friend request: {flag}")
+            return True
+        else:
+            logger.error(f"Failed to approve friend request, response: {str(result)}")
+            return False
+    else:
+        logger.error(f"Failed to approve friend request, status code: {str(response.status_code)}")
+        return False
+
+
 def send_private_message(user_id, content):
     url = f"{http_url}/send_private_msg"
     headers = {
