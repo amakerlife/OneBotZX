@@ -48,11 +48,12 @@ def process_message(request_data):
                                                 f"{chat_prefix} logout - 登出学生账号\n"
                                                 f"{chat_prefix} info - 获取用户信息\n"
                                                 f"{chat_prefix} exam list - 获取考试列表\n"
-                                                f"{chat_prefix} exam score <考试ID> - 获取考试成绩\n"
+                                                f"{chat_prefix} exam score <考试ID> - 获取考试成绩（初次使用可能较慢）\n"
                                                 f"{chat_prefix} exam answersheet <考试ID> - 获取考试答题卡\n"
                                                 f"{chat_prefix} help - 获取帮助信息\n"
-                                                f"\n提醒：提供的密码仅用于验证身份及获取数据，不会被记录。"
-                                                f"登录完成后您可以立即撤回密码。")
+                                                f"\n提醒：提供的密码仅用于验证身份及获取数据。登录完成后您可以立即撤回密码。\n"
+                                                f"例如，使用 /zx login abcd 1234 来登录。\n"
+                                                f"使用本机器人即表示您同意遵守相关规定，并为使用本机器人的所有行为负责。")
                 if int(sender_id) in admins:
                     send_private_message(sender_id, f"欢迎您，管理员 {sender_id}：\n"
                                                     f"{chat_prefix} admin rm data <stu_list|exam_scores|all> - 清除缓存数据\n"

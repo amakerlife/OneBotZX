@@ -18,8 +18,9 @@ class Score:
 
 
 class StudentScoreInfo:
-    def __init__(self, username, label, class_name, all_score, class_rank, school_rank):
+    def __init__(self, username, user_id, label, class_name, all_score, class_rank, school_rank):
         self.username = username
+        self.user_id = user_id
         self.label = label
         self.class_name = class_name
         self.scores = {"总分": Score("总分", all_score, class_rank, school_rank, -1)}
@@ -186,14 +187,13 @@ def get_exam_all_rank(myaccount: TeacherAccount, examid: str) -> List:
             data={
                 "examId": examid,
                 "pageIndexInt": page,
-                "version": "V3",
-            },
-            headers={"token": myaccount.get_token()},
+            }
         )
         data = r.json()["result"]
         for student in data["studentRank"]:
-            student_info = StudentScoreInfo(student["userName"], student["studentLabel"], student["className"],
-                                            student["allScore"], student["classRank"], student["schoolRank"])
+            student_info = StudentScoreInfo(student["userName"], student["userId"], student["studentLabel"],
+                                            student["className"], student["allScore"], student["classRank"],
+                                            student["schoolRank"])
             for score_info in student["scoreInfos"]:
                 subject_name = subjects[score_info["subjectCode"]]["name"]
                 student_info.add_subject_score(subject_name, score_info["score"], score_info["classRank"],
@@ -307,7 +307,7 @@ def process_answersheet(myaccount: TeacherAccount, subjectid: str, stuid: str):
 
 def get_stuid_by_stuname(myaccount: TeacherAccount, examid: str, stuname: str) -> str:  # XXX: 适配无法获取的情况
     """
-    根据学生姓名、examid 和 classid 获取学生 ID
+    根据学生姓名和 examid 获取学生 ID
     Args:
         myaccount: 教师账号
         examid: 考试 ID

@@ -17,14 +17,16 @@ def save_cache(file: str, data):
         logger.info(f"Successfully saved cache: {file}")
 
 
-def load_cache(file: str):
+def load_cache(file: str, typ="dict"):
     try:
         with open(f"./.zx/data/{file}.pkl", "rb") as f:
             logger.info(f"Successfully loaded cache: {file}")
             return pickle.load(f)
     except Exception as e:
         logger.error(f"Failed to load cache: {e}")
-        return {}
+        if typ == "dict":
+            return {}
+        return []
 
 
 def save_ban_list(ban_list):

@@ -162,31 +162,36 @@ def get_exams(qqid):
     return returns
 
 
-def get_rank_by_stu_code(qqid, exam_id):  # TODO: 使用全部排行榜计算排名
+def get_rank_by_stu_code(qqid, exam_id):
     """通过 stu_code 获得排名"""
+    stu, status = get_user(qqid)
+    if not status:
+        return None
     stu_school = stu_list[qqid].clazz.school.id
     global tch_list
     if stu_school not in tch_list:
         raise FailedGetTeacherAccountError
-    tch_list[stu_school]=update_login_status_self(tch_list[stu_school])
-    tch = tch_list[stu_school]
-    global exam_scores_by_stu
-    exam_scores_by_stu = load_cache("exam_scores")
-    if exam_id not in exam_scores_by_stu or stu_list[qqid].code not in exam_scores_by_stu[exam_id]:
-        result = get_school_rank_by_stu_code(tch, exam_id, stu_list[qqid].code)
-        if exam_id not in exam_scores_by_stu:
-            exam_scores_by_stu[exam_id] = {}
-        exam_scores_by_stu[exam_id][stu_list[qqid].code] = result
-        save_cache("exam_scores", exam_scores_by_stu)
-        returns = ""
-        for score in result:
-            returns += f"{score.name}: {score.score} (班次 {score.classrank}/校次 {score.schoolrank})\n"
-        return returns
-    else:
-        returns = ""
-        for score in exam_scores_by_stu[exam_id][stu_list[qqid].code]:
-            returns += f"{score.name}: {score.score} (班次 {score.classrank}/校次 {score.schoolrank})\n"
-        return returns
+
+    # Refactor: get_exam_all_rank
+    global exam_scores
+    exam_scores = load_cache("exam_scores")
+    if exam_id not in exam_scores:
+        tch_list[stu_school] = update_login_status_self(tch_list[stu_school])
+        tch = tch_list[stu_school]
+        save_cache("tch_list", tch_list)
+        exam_scores[exam_id] = get_exam_all_rank(tch, exam_id)
+        save_cache("exam_scores", exam_scores)
+    students_scores_list = exam_scores[exam_id]
+    returns = ""
+    logger.debug(f"students_scores_list: {students_scores_list}")
+    for student in students_scores_list:
+        # logger.debug(student.username)
+        if student.user_id == stu.id:
+            for subject in student.scores:
+                returns += f"{subject}: {student.scores[subject].score} (班次 {student.scores[subject].classrank}" \
+                           f"/校次 {student.scores[subject].schoolrank})\n"
+            logger.debug(returns)
+            return returns
 
 
 def get_exam_rank(qqid, exam_id: str):
@@ -197,11 +202,12 @@ def get_exam_rank(qqid, exam_id: str):
         raise FailedGetTeacherAccountError
     tch_list[stu_school] = update_login_status_self(tch_list[stu_school])
     tch = tch_list[stu_school]
+    save_cache("tch_list", tch_list)
     wb = Workbook()
     ws = wb.active
     subjects_list = get_exam_subjects(tch, exam_id)
     global exam_scores
-    exam_scores = load_cache("exam_scores")
+    exam_scores = load_cache("exam_scores", "list")
     if exam_id in exam_scores:
         students_scores_list = exam_scores[exam_id]
     else:
@@ -234,6 +240,7 @@ def get_answersheet_by_stuid(qqid, stu_id, examid):
         raise FailedGetTeacherAccountError
     tch_list[stu_school] = update_login_status_self(tch_list[stu_school])
     tch = tch_list[stu_school]
+    save_cache("tch_list", tch_list)
     subject_list = get_exam_subjects(tch, examid)
     images = []
     for subject_code in subject_list:
@@ -258,6 +265,7 @@ def get_answersheet_by_stuname(stu_name, qqid, examid):
         raise FailedGetTeacherAccountError
     tch_list[stu_school] = update_login_status_self(tch_list[stu_school])
     tch = tch_list[stu_school]
+    save_cache("tch_list", tch_list)
     stu, status = get_user(qqid)
     if not status:
         return None
