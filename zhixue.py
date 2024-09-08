@@ -261,8 +261,7 @@ def get_answersheet_by_stuname(stu_name, qqid, examid):
     stu, status = get_user(qqid)
     if not status:
         return None
-    classid = stu.get_clazz().id
-    stu_id = get_stuid_by_stuname(tch, examid, classid, stu_name)
+    stu_id = get_stuid_by_stuname(tch, examid, stu_name)
     return get_answersheet_by_stuid(qqid, stu_id, examid)
 
 

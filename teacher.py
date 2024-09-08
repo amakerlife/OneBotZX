@@ -1,12 +1,11 @@
 import json
 from typing import List
 from time import sleep
+from venv import logger
 
 from zhixuewang.teacher import TeacherAccount
 from answersheet import draw_answersheet
 from models import ZhixueError
-
-from loguru import logger
 
 
 class Score:
@@ -306,25 +305,26 @@ def process_answersheet(myaccount: TeacherAccount, subjectid: str, stuid: str):
     return image
 
 
-def get_stuid_by_stuname(myaccount: TeacherAccount, examid: str, classid: str, stuname: str) -> str:  # XXX: 适配无法获取的情况
+def get_stuid_by_stuname(myaccount: TeacherAccount, examid: str, stuname: str) -> str:  # XXX: 适配无法获取的情况
     """
     根据学生姓名、examid 和 classid 获取学生 ID
     Args:
         myaccount: 教师账号
         examid: 考试 ID
-        classid: 班级 ID
         stuname: 学生姓名
     Return:
         str: 学生 ID
     """
     r = myaccount.get_session().post(
-        "https://www.zhixue.com/api-classreport/class/examscoreInfo/",
+        "https://www.zhixue.com/api-teacher/api/studentScore/getAllSubjectStudentRank/",
         data={
             "examId": examid,
-            "classId": classid,
-            "searchKeyName": stuname,
+            "searchValue": stuname,
         },
-        headers={"token": myaccount.get_token()},
+        # headers={"token": myaccount.get_token()},
     )
-    data = r.json()["result"]["studentScoreDetailDTO"][0]["userId"]
+    if "<html" in r.text:
+        logger.warning("Failed to get student id")
+        raise ZhixueError("Failed to get student id")
+    data = r.json()["result"]["studentRank"][0]["userId"] # TODO: 支持多个学生，进行选择
     return data

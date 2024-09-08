@@ -1,5 +1,3 @@
-from typing import Tuple, Any
-
 import requests
 from requests import Session
 from zhixuewang.exceptions import LoginError, UserOrPassError, UserNotFoundError
@@ -35,7 +33,11 @@ def gen_captcha_data(session: requests.Session) -> dict:
     logger.info("Getting captcha")
     captcha_data = None
     for attempt in range(MAX_RETRIES):
-        captcha_data = session.get("http://54.169.202.224:8080/get_geetest", timeout=5).json()["data"]
+        try:
+            captcha_data = session.get("http://54.169.202.224:8080/get_geetest", timeout=5).json()["data"]
+        except Exception as e:
+            logger.warning(f"Failed to get captcha: {e}")
+            continue
         if captcha_data["result"] == "success":
             break
         if attempt == MAX_RETRIES - 1:
