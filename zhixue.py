@@ -32,6 +32,7 @@ for teacher_account in teacher_usernames: # TODO: 自动维护（删除）不在
         tch_account = login_by_captcha(teacher_account, teacher_passwords[teacher_usernames.index(teacher_account)])
         tch_school = tch_account.school.id
         tch_list[tch_school] = tch_account
+        logger.success(f"Successfully initialized teacher account: {teacher_account}")
     # if teacher_account not in tch_list:
     #     tch_account = login_by_captcha(teacher_account, teacher_passwords[teacher_usernames.index(teacher_account)])
     #     tch_school = tch_account.school.id
@@ -183,14 +184,11 @@ def get_rank_by_stu_code(qqid, exam_id):
         save_cache("exam_scores", exam_scores)
     students_scores_list = exam_scores[exam_id]
     returns = ""
-    logger.debug(f"students_scores_list: {students_scores_list}")
     for student in students_scores_list:
-        # logger.debug(student.username)
         if student.user_id == stu.id:
             for subject in student.scores:
                 returns += f"{subject}: {student.scores[subject].score} (班次 {student.scores[subject].classrank}" \
                            f"/校次 {student.scores[subject].schoolrank})\n"
-            logger.debug(returns)
             return returns
 
 

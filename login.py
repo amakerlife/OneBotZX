@@ -86,6 +86,7 @@ def login_via_changyan(username: str, password: str, captcha_data: dict, session
     if captcha_result["Msg"] != "获取用户信息成功":
         logger.error(f"Failed to login: {captcha_result['Msg']}")
         raise LoginError(f"Failed to login: {captcha_result['Msg']}")
+    logger.success(f"Successfully logged in(changyan): {username}")
     return json.loads(captcha_result["Data"])["captchaResult"], session
 
 def login_via_zhixue(username: str, password: str, captcha_data: dict, session: requests.Session) -> tuple[
@@ -111,13 +112,14 @@ def login_via_zhixue(username: str, password: str, captcha_data: dict, session: 
         "thirdCaptchaExtInfo[lot_number]": captcha_data["seccode"]["lot_number"],
         "thirdCaptchaExtInfo[pass_token]": captcha_data["seccode"]["pass_token"],
         "loginName": username,
-        "password": password
+        "password": password,
     }
     # exit(0)
     captcha_result = session.post(login_url, data=data).json()
     if captcha_result["result"] != "success":
         logger.error(f"Failed to login: {captcha_result['message']}")
         raise LoginError(f"Failed to login: {captcha_result['message']}")
+    logger.success(f"Successfully logged in(zhixue): {username}")
     return captcha_result["data"]["captchaId"], session
 
 def get_session_by_captcha(username: str, password: str) -> requests.Session:
@@ -145,11 +147,11 @@ def get_session_by_captcha(username: str, password: str) -> requests.Session:
     if login_method == "zhixue":
         try:
             captcha_data = gen_captcha_data(session)
-            captcha_id, session = login_via_zhixue(username, password, captcha_data, session)
+            captcha_id, session = login_via_zhixue(username, origin_password, captcha_data, session)
         except LoginError:
             try:
                 captcha_data = gen_captcha_data(session)
-                captcha_id, session = login_via_changyan(username, origin_password, captcha_data, session)
+                captcha_id, session = login_via_changyan(username, password, captcha_data, session)
             except LoginError as e:
                 logger.info(f"Failed to login(web): {e}")
                 raise e

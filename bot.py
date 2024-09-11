@@ -94,7 +94,7 @@ def process_message(request_data):
                     elif status == 3:
                         if sender_id in wait_for_login:
                             zhixue.logout_stu(wait_for_login[sender_id])
-                            status = zhixue.login_stu(sender_id, username, password)
+                            status, info = zhixue.login_stu(sender_id, username, password)
                             if status == 0:
                                 send_private_message(sender_id,
                                                  f"登录成功，已下线 {wait_for_login.get(sender_id)} 的登录状态。")
