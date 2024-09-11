@@ -10,8 +10,8 @@ from login import update_login_status_self, login_by_captcha
 from models import ZhixueError, LoginCaptchaError, FailedGetTeacherAccountError
 
 from filesystem import save_cache, load_cache
-from teacher import get_school_rank_by_stu_code, get_exam_all_rank, get_exam_subjects, process_answersheet, \
-    get_stuid_by_stuname
+from msg import send_private_message
+from teacher import get_exam_all_rank, get_exam_subjects, process_answersheet, get_stuid_by_stuname
 from config import zhixue_config
 
 teacher_usernames = zhixue_config.teacher_accounts
@@ -171,6 +171,7 @@ def get_rank_by_stu_code(qqid, exam_id):
     stu_school = stu_list[qqid].clazz.school.id
     global tch_list
     if stu_school not in tch_list:
+        send_private_message(qqid, "暂不支持所在学校，请联系管理员。")
         raise FailedGetTeacherAccountError
 
     # Refactor: get_exam_all_rank
@@ -197,6 +198,7 @@ def get_exam_rank(qqid, exam_id: str):
     stu_school = stu_list[qqid].clazz.school.id
     global tch_list
     if stu_school not in tch_list:
+        send_private_message(qqid, "暂不支持所在学校，请联系管理员。")
         raise FailedGetTeacherAccountError
     tch_list[stu_school] = update_login_status_self(tch_list[stu_school])
     tch = tch_list[stu_school]
@@ -235,6 +237,7 @@ def get_answersheet_by_stuid(qqid, stu_id, examid):
     stu_school = stu_list[qqid].clazz.school.id
     global tch_list
     if stu_school not in tch_list:
+        send_private_message(qqid, "暂不支持所在学校，请联系管理员。")
         raise FailedGetTeacherAccountError
     tch_list[stu_school] = update_login_status_self(tch_list[stu_school])
     tch = tch_list[stu_school]
@@ -260,6 +263,7 @@ def get_answersheet_by_stuname(stu_name, qqid, examid):
     stu_school = stu_list[qqid].clazz.school.id
     global tch_list
     if stu_school not in tch_list:
+        send_private_message(qqid, "暂不支持所在学校，请联系管理员。")
         raise FailedGetTeacherAccountError
     tch_list[stu_school] = update_login_status_self(tch_list[stu_school])
     tch = tch_list[stu_school]

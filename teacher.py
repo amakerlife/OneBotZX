@@ -1,7 +1,7 @@
 import json
 from typing import List
 from time import sleep
-from venv import logger
+from loguru import logger
 
 from zhixuewang.teacher import TeacherAccount
 from answersheet import draw_answersheet
