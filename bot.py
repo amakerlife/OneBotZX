@@ -1,7 +1,10 @@
 import os
+import time
 
 from flask import Flask, request
 from loguru import logger
+
+logger.add(f"./.zx/log/{time.strftime('%Y-%m-%d')}.log", encoding="utf-8")
 
 import zhixue
 from config import message_config

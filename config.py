@@ -36,5 +36,5 @@ try:
     zhixue_config = ZhixueConfig(**config_data.get("zhixue", {}))
     logger.success("Config loaded successfully")
 except Exception as e:
-    logger.error(f"FATAL ERROR: Failed to load config: {e}")
+    logger.critical(f"FATAL ERROR: Failed to load config: {e}")
     raise ConfigError(f"Failed to load config: {e}")
