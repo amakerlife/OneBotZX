@@ -1,0 +1,18 @@
+onebot:
+  http_url: ""
+  access_token: ""
+
+message:
+  chat_prefix: "" # 命令前缀
+  admins:
+    - 0 # 管理员 QQ 号，可配置多个
+  reply_limit: 1 # 消息回复时间间隔限制，默认为 1
+  max_reply: 0 # 达到该次数后将用户封禁，默认 0 不封禁
+
+zhixue: # 智学网配置，可配置多个，一一对应
+  teacher_accounts:
+    - ""
+  teacher_passwords:
+    - ""
+  teacher_login_method:
+    - ""

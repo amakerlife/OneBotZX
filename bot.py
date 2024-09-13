@@ -1,7 +1,9 @@
 import os
 import time
+from queue import Queue
 
 from flask import Flask, request
+from flask_limiter import Limiter
 from loguru import logger
 
 logger.add(f"./.zx/log/{time.strftime('%Y-%m-%d')}.log", encoding="utf-8")
@@ -11,18 +13,56 @@ from config import message_config
 from filesystem import load_ban_list, save_ban_list, clean_cache_data, clean_cache_file
 from msg import send_private_message, send_private_file, send_private_img, approve_friend_request
 
-app = Flask(__name__)
 
+# Config Start
 chat_prefix = message_config.chat_prefix
 admins = message_config.admins
+reply_limit = message_config.reply_limit
+max_reply = message_config.max_reply
 
 wait_for_login = {}
 ban_list = []
+# Config End
+
+
+# Flask Config Start
+rate_limit_status = {}
+app = Flask(__name__)
+
+
+def get_sender_id():
+    request_data = request.get_json()
+    return str(request_data.get("sender", {}).get("user_id", ""))
+
+
+limiter = Limiter(app=app, key_func=get_sender_id, default_limits=[])
+queue = Queue()
+
+
+@app.before_request
+def queue_requests():
+    queue.put(time.time())
+
+
+@app.after_request
+def process_queue(response):
+    current_time = time.time()
+    request_time = queue.get()
+
+    wait_time = reply_limit - (current_time - request_time)
+    if wait_time > 0:
+        time.sleep(wait_time)
+
+    return response
 
 
 @app.route("/", methods=["POST"])
+@limiter.limit("20 per 5 minutes")
+@limiter.limit("50 per hour")
 def handle_request():
     request_data = request.get_json()
+    if str(request_data.get("sender", {}).get("user_id", "")) in rate_limit_status:
+        del rate_limit_status[str(request_data.get("sender", {}).get("user_id", ""))]
 
     if request_data.get("post_type") == "request" and request_data.get("request_type") == "friend":
         process_friend_request(request_data)
@@ -31,6 +71,27 @@ def handle_request():
         process_message(request_data)
 
     return '', 204
+
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    sender_id = str(request.get_json().get("sender", {}).get("user_id", ""))
+    if sender_id in ban_list:
+        return '', 403
+    if sender_id not in rate_limit_status:
+        rate_limit_status[sender_id] = 0
+        send_private_message(sender_id, "已触发请求数量限制，请 10 分钟后再试。多次触发将导致封禁。")
+    logger.debug(f"Rate limit exceeded: {sender_id}")
+    rate_limit_status[sender_id] += 1
+    if rate_limit_status[sender_id] >= max_reply:
+        ban_list.append(int(sender_id))
+        save_ban_list(ban_list)
+        send_private_message(sender_id, "因多次触发请求频率限制，已被封禁。请联系管理员。")
+        logger.warning(f"{sender_id} has been banned due to frequent requests.")
+    return '', 429
+
+
+# Flask Config End
 
 
 def process_friend_request(request_data):
@@ -100,7 +161,7 @@ def process_message(request_data):
                             status, info = zhixue.login_stu(sender_id, username, password)
                             if status == 0:
                                 send_private_message(sender_id,
-                                                 f"登录成功，已下线 {wait_for_login.get(sender_id)} 的登录状态。")
+                                                     f"登录成功，已下线 {wait_for_login.get(sender_id)} 的登录状态。")
                             else:
                                 send_private_message(sender_id, "登录失败。")
                             send_private_message(wait_for_login[sender_id], f"您的智学网账号已被 {sender_id} 使用。"
@@ -231,4 +292,4 @@ if __name__ == "__main__":
     zhixue.load_all_stu_list()
     ban_list = load_ban_list()
     # 启动 Flask 应用程序
-    app.run(host="127.0.0.1", port=5010)
+    app.run(host="127.0.0.1", port=5010, threaded=False)

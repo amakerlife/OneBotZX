@@ -5,3 +5,4 @@ Requests==2.31.0
 zhixuewang==1.2.7
 openpyxl==3.1.2
 pillow==10.3.0
+Flask-Limiter==3.8.0

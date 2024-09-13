@@ -15,9 +15,11 @@ class OnebotConfig:
 
 
 class MessageConfig:
-    def __init__(self, chat_prefix: str, admins: list[int]):
+    def __init__(self, chat_prefix: str, admins: list[int], reply_limit=1, max_reply=0):
         self.chat_prefix = chat_prefix
         self.admins = admins
+        self.reply_limit = reply_limit
+        self.max_reply = max_reply
 
 
 class ZhixueConfig:
