@@ -145,7 +145,7 @@ def process_message(request_data):
                                                     f"{chat_prefix} admin forcelogout <QQ 号> - 强制登出 QQ 对应的学生账号\n"
                                                     f"{chat_prefix} admin examxlsx <考试ID> - 获取考试成绩单\n"
                                                     f"{chat_prefix} admin examanswersheet <id|name> <学生ID> <考试ID> - 获取考试答题卡\n")
-                if int(sender_id) in admins:
+                if int(sender_id) in super_users:
                     send_private_message(sender_id, f"欢迎您，高级用户 {sender_id}：\n"
                                                     f"{chat_prefix} sudo examxlsx <考试ID> - 获取考试成绩单\n")
                                                     # f"{chat_prefix} sudo examanswersheet <id|name> <学生ID> <考试ID> - 获取考试答题卡\n")
