@@ -220,6 +220,7 @@ def get_answersheet_data(myaccount: TeacherAccount, subjectid: str, stuid: str):
             "topicSetId": subjectid,
             "userId": stuid,
         },
+        headers={"token": myaccount.get_token()},
     )
 
     try:
@@ -231,6 +232,7 @@ def get_answersheet_data(myaccount: TeacherAccount, subjectid: str, stuid: str):
     topic_mapping = data["markingTopicDetail"]  # 题号对应情况
 
     page_positions = {}  # 每页位置信息
+    page_index_origin = 0
     for page in data["sheetDatas"]["answerSheetLocationDTO"]["pageSheets"]:
         page_index = page["pageIndex"]
         page_positions[page_index] = []
@@ -238,9 +240,11 @@ def get_answersheet_data(myaccount: TeacherAccount, subjectid: str, stuid: str):
             out_left = section["contents"]["position"]["left"]
             out_top = section["contents"]["position"]["top"]
             flag = False
+            use_outside_position = False
             for content in section["contents"]["branch"]:
                 position = content["position"]
                 if position == "":
+                    use_outside_position = True
                     break
                 if (flag or position["left"] <= 0 or position["top"] <= 0 or position["left"] < out_left or
                         position["top"] < out_top):
@@ -254,7 +258,24 @@ def get_answersheet_data(myaccount: TeacherAccount, subjectid: str, stuid: str):
                     "width": position["width"],
                     "ixList": content["ixList"]
                 })
-
+            if use_outside_position:
+                page_index = page_index_origin
+                if page_index not in page_positions:
+                    page_positions[page_index] = []
+                position = section["contents"]["position"]
+                if (position["left"] <= 0 or position["top"] <= 0 or position["left"] < out_left or
+                        position["top"] < out_top):
+                    position["left"] += out_left
+                    position["top"] += out_top
+                page_positions[page_index].append({
+                    "height": position["height"],
+                    "left": position["left"],
+                    "top": position["top"],
+                    "width": position["width"],
+                    "ixList": section["contents"]["branch"][0]["ixList"]
+                })
+                logger.debug(f"Page {page_index}: {page_positions[page_index]}")
+        page_index_origin +=1
     # 客观题答案
     objective_answer = {}
     for item in data["objectAnswer"]:
@@ -299,9 +320,17 @@ def process_answersheet(myaccount: TeacherAccount, subjectid: str, stuid: str):
         subjectid: 学科 ID
         stuid: 学生 ID
     """
-    topic_mapping, page_positions, objective_answer, answer_details, sheet_images, paper_type \
+    try:
+        topic_mapping, page_positions, objective_answer, answer_details, sheet_images, paper_type \
         = get_answersheet_data(myaccount, subjectid, stuid)
-    image = draw_answersheet(topic_mapping, page_positions, objective_answer, answer_details, sheet_images, paper_type)
+    except Exception as e:
+        logger.error(f"Failed to get answersheet data: {e}")
+        raise ZhixueError("Failed to get answersheet data")
+    try:
+        image = draw_answersheet(topic_mapping, page_positions, objective_answer, answer_details, sheet_images, paper_type)
+    except Exception as e:
+        logger.error(f"Failed to draw answersheet: {e}")
+        raise ZhixueError("Failed to draw answersheet")
     return image
 
 

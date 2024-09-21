@@ -55,7 +55,7 @@ def get_user(qqid):
     """
     global stu_list
     if qqid in stu_list:
-        stu_list[qqid]=update_login_status_self(stu_list[qqid])
+        stu_list[qqid] = update_login_status_self(stu_list[qqid])
         return stu_list[qqid], True
     return None, False
 

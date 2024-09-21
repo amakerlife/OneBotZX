@@ -17,6 +17,7 @@ from msg import send_private_message, send_private_file, send_private_img, appro
 # Config Start
 chat_prefix = message_config.chat_prefix
 admins = message_config.admins
+super_users = message_config.super_users
 reply_limit = message_config.reply_limit
 max_reply = message_config.max_reply
 
@@ -55,10 +56,16 @@ def process_queue(response):
 
     return response
 
+def should_limit():
+    try:
+        message = request.get_json().get("message", [])[0].get("data", {}).get("text", "")
+    except Exception:
+        return False
+    return not message.startswith(chat_prefix)
 
 @app.route("/", methods=["POST"])
-@limiter.limit("20 per 5 minutes")
-@limiter.limit("50 per hour")
+@limiter.limit("20 per 5 minutes", exempt_when=should_limit)
+@limiter.limit("50 per hour", exempt_when=should_limit)
 def handle_request():
     request_data = request.get_json()
     if str(request_data.get("sender", {}).get("user_id", "")) in rate_limit_status:
@@ -128,6 +135,7 @@ def process_message(request_data):
                                                 f"\n提醒：提供的密码仅用于验证身份及获取数据。登录完成后您可以立即撤回密码。\n"
                                                 f"例如，使用 /zx login abcd 1234 来登录。\n"
                                                 f"若在日后使用时发现机器人状态为离线，请联系管理员 3372493336 解决。\n"
+                                                f"由于风控和请求数量限制，机器人可能需要至多 2 分钟来响应您的请求。\n"
                                                 f"使用本机器人即表示您同意遵守相关规定，并为使用本机器人的所有行为负责。")
                 if int(sender_id) in admins:
                     send_private_message(sender_id, f"欢迎您，管理员 {sender_id}：\n"
@@ -137,6 +145,10 @@ def process_message(request_data):
                                                     f"{chat_prefix} admin forcelogout <QQ 号> - 强制登出 QQ 对应的学生账号\n"
                                                     f"{chat_prefix} admin examxlsx <考试ID> - 获取考试成绩单\n"
                                                     f"{chat_prefix} admin examanswersheet <id|name> <学生ID> <考试ID> - 获取考试答题卡\n")
+                if int(sender_id) in admins:
+                    send_private_message(sender_id, f"欢迎您，高级用户 {sender_id}：\n"
+                                                    f"{chat_prefix} sudo examxlsx <考试ID> - 获取考试成绩单\n")
+                                                    # f"{chat_prefix} sudo examanswersheet <id|name> <学生ID> <考试ID> - 获取考试答题卡\n")
                 return
 
             elif message.startswith("login"):
@@ -279,6 +291,30 @@ def process_message(request_data):
                         file_paths = zhixue.get_answersheet_by_stuname(stuid, sender_id, examid)
                         for file_path in file_paths:
                             send_private_img(sender_id, f"file://{os.path.abspath(file_path)}")
+
+            elif message.startswith("sudo"):
+                if int(sender_id) not in super_users:
+                    send_private_message(sender_id, "您无权使用该指令。")
+                    return
+                message = message[len("sudo") + 1:].strip()
+                if message.startswith("examxlsx"):
+                    examid = message.split(" ", 2)[1]
+                    file_path = zhixue.get_exam_rank(sender_id, examid)
+                    if file_path:
+                        send_private_file(sender_id, f"file://{os.path.abspath(file_path)}")
+                    else:
+                        send_private_message(sender_id, "获取考试排名失败！")
+                # elif message.startswith("examanswersheet"):
+                #     message = message[len("examanswersheet") + 1:].strip()
+                #     method, stuid, examid = message.split(" ", 3)
+                #     if method == "id":
+                #         file_paths = zhixue.get_answersheet_by_stuid(sender_id, stuid, examid)
+                #         for file_path in file_paths:
+                #             send_private_img(sender_id, f"file://{os.path.abspath(file_path)}")
+                #     elif method == "name":
+                #         file_paths = zhixue.get_answersheet_by_stuname(stuid, sender_id, examid)
+                #         for file_path in file_paths:
+                #             send_private_img(sender_id, f"file://{os.path.abspath(file_path)}")
 
                 return
 

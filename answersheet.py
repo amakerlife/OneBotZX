@@ -92,7 +92,7 @@ def draw_answersheet(topic_mapping, page_positions, objective_answer, answer_det
                                   fill="green", font=font)
                     elif check_multiple(objective_answer[problem]["answer"],
                                         objective_answer[problem]["standardAnswer"]) == 1:
-                        draw.text((left + 5, top + 10 + 27 * j),                                 f"{topic_mapping.get(str(problem))}: {objective_answer[problem]['standardAnswer']}({objective_answer[problem]['answer']})",
+                        draw.text((left + 5, top + 10 + 27 * j),f"{topic_mapping.get(str(problem))}: {objective_answer[problem]['standardAnswer']}({objective_answer[problem]['answer']})",
                                   fill="darkorange", font=font)
                     else:
                         draw.text((left + 5, top + 10 + 27 * j),

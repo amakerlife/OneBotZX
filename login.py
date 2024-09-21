@@ -84,7 +84,7 @@ def login_via_changyan(username: str, password: str, captcha_data: dict, session
     }
     captcha_result = session.post(login_url, data=data).json()
     if captcha_result["Msg"] != "获取用户信息成功":
-        logger.error(f"Failed to login: {captcha_result['Msg']}")
+        logger.error(f"Failed to login(changyan): {captcha_result['Msg']}")
         raise LoginError(f"Failed to login: {captcha_result['Msg']}")
     logger.success(f"Successfully logged in(changyan): {username}")
     return json.loads(captcha_result["Data"])["captchaResult"], session
@@ -117,7 +117,7 @@ def login_via_zhixue(username: str, password: str, captcha_data: dict, session: 
     # exit(0)
     captcha_result = session.post(login_url, data=data).json()
     if captcha_result["result"] != "success":
-        logger.error(f"Failed to login: {captcha_result['message']}")
+        logger.error(f"Failed to login(zhixue): {captcha_result['message']}")
         raise LoginError(f"Failed to login: {captcha_result['message']}")
     logger.success(f"Successfully logged in(zhixue): {username}")
     return captcha_result["data"]["captchaId"], session
