@@ -116,6 +116,8 @@ def process_message(request_data):
     message_type = request_data.get("message_type", "")
     message = request_data.get("message", [])[0].get("data", {}).get("text", "")
 
+    # TODO: 教师账户不可用提示。
+
     if message_type == "private":  # 私聊消息
         if int(sender_id) in ban_list:
             logger.info(f"Private: {sender_id}({sender_nickname}) -> {self_id}: {message} (BANNED)")
@@ -166,7 +168,7 @@ def process_message(request_data):
                         del wait_for_login[sender_id]
                     elif status == 2:
                         logger.warning(f"{sender_id} repeat login in: {info}")
-                        send_private_message(sender_id, f"已登录智学网账号 {info}。")
+                        send_private_message(sender_id, f"已登录智学网账号 {info}。如需登录新账号，请先发送 /zx logout。")
                     elif status == 3:
                         if sender_id in wait_for_login:
                             zhixue.logout_stu(wait_for_login[sender_id])
