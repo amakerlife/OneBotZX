@@ -16,8 +16,8 @@
 ```bash
 git clone https://github.com/amakerlife/OneBotZX
 cd OneBotZX
-mv config.example.cfg config.cfg
-vim config.cfg
+mv config.example.yml config.yml
+vim config.yml
 pip install -r requirements.txt
 python bot.py
 ```
@@ -31,3 +31,7 @@ python bot.py
 - [ ] 管理员查看教师端考试列表
 - [ ] 支持为用户分配自定义权限（可能伴随着更改配置文件格式为 json）
 - [ ] 支持查看题目答案
+
+## 提示
+
+使用本项目前，请确保拥有目标学校具有查看至少班级报告权限的教师账号。如需全部功能，请添加校长/管理员账号。本项目不会提供验证码 API，请自行解决。
