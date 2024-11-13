@@ -6,7 +6,7 @@ from flask import Flask, request
 from flask_limiter import Limiter
 from loguru import logger
 
-logger.add(f"./.zx/log/{time.strftime('%Y-%m-%d')}.log", encoding="utf-8")
+logger.add(f"./.zx/log/zxbot.log", encoding="utf-8", rotation="00:00", enqueue=True)
 
 import zhixue
 from config import message_config
@@ -96,8 +96,6 @@ def ratelimit_handler(e):
         send_private_message(sender_id, "因多次触发请求频率限制，已被封禁。请联系管理员。")
         logger.warning(f"{sender_id} has been banned due to frequent requests.")
     return '', 429
-
-
 # Flask Config End
 
 
