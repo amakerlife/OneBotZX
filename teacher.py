@@ -204,7 +204,7 @@ def get_exam_all_rank(myaccount: TeacherAccount, examid: str) -> List:
     return students_list
 
 
-def get_answersheet_data(myaccount: TeacherAccount, subjectid: str, stuid: str):  # FIXME: 某些答题卡数据格式不同
+def get_answersheet_data(myaccount: TeacherAccount, subjectid: str, stuid: str):  # FIXME: 某些答题卡数据格式不同(统考语文)
     """
     获取答题卡数据
     Args:
@@ -274,7 +274,7 @@ def get_answersheet_data(myaccount: TeacherAccount, subjectid: str, stuid: str):
                     "width": position["width"],
                     "ixList": section["contents"]["branch"][0]["ixList"]
                 })
-                logger.debug(f"Page {page_index}: {page_positions[page_index]}")
+                # logger.debug(f"Page {page_index}: {page_positions[page_index]}")
         page_index_origin +=1
     # 客观题答案
     objective_answer = {}

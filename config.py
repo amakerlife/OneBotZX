@@ -24,10 +24,12 @@ class MessageConfig:
 
 
 class ZhixueConfig:
-    def __init__(self, teacher_accounts: list[str], teacher_passwords: list[str], teacher_login_method: list[str]):
+    def __init__(self, teacher_accounts: list[str], teacher_passwords: list[str], teacher_login_method: list[str],
+                 captcha_api: str):
         self.teacher_accounts = teacher_accounts
         self.teacher_passwords = teacher_passwords
         self.teacher_login_method = teacher_login_method
+        self.captcha_api = captcha_api
 
 
 with open(config_path, "r", encoding="utf-8") as file:

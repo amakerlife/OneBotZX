@@ -11,6 +11,7 @@ from zhixuewang.student import StudentAccount
 from zhixuewang.teacher import TeacherAccount
 from zhixuewang.urls import Url
 
+import config
 from models import LoginCaptchaError
 from msg import send_private_message
 
@@ -18,6 +19,8 @@ from config import zhixue_config
 
 teacher_accounts = zhixue_config.teacher_accounts
 teacher_login_method = zhixue_config.teacher_login_method
+captcha_api = zhixue_config.captcha_api
+top_admin_id = config.message_config.admins[0]
 
 
 MAX_RETRIES = 5
@@ -40,16 +43,16 @@ def gen_captcha_data(session: requests.Session) -> dict:
     captcha_data = None
     for attempt in range(MAX_RETRIES):
         try:
-            captcha_data = session.get("http://54.169.202.224:8080/get_geetest", timeout=5).json()["data"]
+            captcha_data = session.get(captcha_api, timeout=5).json()["data"]
         except Exception as e:
             logger.warning(f"Failed to get captcha: {e}")
+            if attempt == MAX_RETRIES - 1:
+                logger.error(f"Failed to get captcha after {MAX_RETRIES} attempts")
+                send_private_message(int(top_admin_id), "验证码获取失败。")
+                raise LoginCaptchaError(f"Failed to get captcha after {MAX_RETRIES} attempts")
             continue
         if captcha_data["result"] == "success":
             break
-        if attempt == MAX_RETRIES - 1:
-            logger.error(f"Failed to get captcha after {MAX_RETRIES} attempts")
-            send_private_message(337249336, "验证码获取失败。")
-            raise LoginCaptchaError(f"Failed to get captcha after {MAX_RETRIES} attempts")
     return captcha_data
 
 def login_via_changyan(username: str, password: str, captcha_data: dict, session: requests.Session) -> tuple[
