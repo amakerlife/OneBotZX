@@ -15,7 +15,7 @@ class OnebotConfig:
 
 
 class MessageConfig:
-    def __init__(self, chat_prefix: str, admins: list[int], super_users:list[int],reply_limit=1, max_reply=0):
+    def __init__(self, chat_prefix: str, admins: list[int], super_users: list[int], reply_limit=1, max_reply=0):
         self.chat_prefix = chat_prefix
         self.admins = admins
         self.super_users = super_users

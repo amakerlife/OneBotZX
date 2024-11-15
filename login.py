@@ -1,12 +1,12 @@
+import base64
+import json
+
 import requests
+from loguru import logger
 from requests import Session
 from zhixuewang.exceptions import LoginError, UserOrPassError, UserNotFoundError
 from zhixuewang.models import Account
 from zhixuewang.session import get_basic_session, check_is_student
-from loguru import logger
-import json
-import base64
-
 from zhixuewang.student import StudentAccount
 from zhixuewang.teacher import TeacherAccount
 from zhixuewang.urls import Url
@@ -15,15 +15,13 @@ import config
 from models import LoginCaptchaError
 from msg import send_private_message
 
-from config import zhixue_config
-
-teacher_accounts = zhixue_config.teacher_accounts
-teacher_login_method = zhixue_config.teacher_login_method
-captcha_api = zhixue_config.captcha_api
+teacher_accounts = config.zhixue_config.teacher_accounts
+teacher_login_method = config.zhixue_config.teacher_login_method
+captcha_api = config.zhixue_config.captcha_api
 top_admin_id = config.message_config.admins[0]
 
-
 MAX_RETRIES = 5
+
 
 def gen_encrypted_password(password):
     if len(password) != 32:
@@ -37,6 +35,7 @@ def gen_encrypted_password(password):
             .hex()
         )  # by immoses648
     return password
+
 
 def gen_captcha_data(session: requests.Session) -> dict:
     logger.info("Getting captcha")
@@ -54,6 +53,7 @@ def gen_captcha_data(session: requests.Session) -> dict:
         if captcha_data["result"] == "success":
             break
     return captcha_data
+
 
 def login_via_changyan(username: str, password: str, captcha_data: dict, session: requests.Session) -> tuple[
     str, Session]:
@@ -92,6 +92,7 @@ def login_via_changyan(username: str, password: str, captcha_data: dict, session
     logger.success(f"Successfully logged in(changyan): {username}")
     return json.loads(captcha_result["Data"])["captchaResult"], session
 
+
 def login_via_zhixue(username: str, password: str, captcha_data: dict, session: requests.Session) -> tuple[
     str, Session]:
     """
@@ -124,6 +125,7 @@ def login_via_zhixue(username: str, password: str, captcha_data: dict, session: 
         raise LoginError(f"Failed to login: {captcha_result['message']}")
     logger.success(f"Successfully logged in(zhixue): {username}")
     return captcha_result["data"]["captchaId"], session
+
 
 def get_session_by_captcha(username: str, password: str) -> requests.Session:
     """通过用户名和密码获取 session，使用验证码
@@ -241,6 +243,7 @@ def get_session_by_captcha(username: str, password: str) -> requests.Session:
     session.cookies.set("pwd", base64.b64encode(password.encode()).decode())
     return session
 
+
 def login_by_captcha(username: str, password: str) -> Account:
     """通过用户名和密码登录，使用验证码
 
@@ -261,13 +264,14 @@ def login_by_captcha(username: str, password: str) -> Account:
         return StudentAccount(session).set_base_info()
     return TeacherAccount(session).set_base_info().set_advanced_info()
 
+
 def update_login_status_self(account: Account):
-        """更新登录状态. 如果 session 过期自动重新获取"""
-        r = account._session.get(Url.GET_LOGIN_STATE)
-        data = r.json()
-        if data["result"] == "success":
-            return account
-        # session过期
-        password = base64.b64decode(account._session.cookies["pwd"].encode()).decode()
-        account._session = get_session_by_captcha(account.username, password)
+    """更新登录状态. 如果 session 过期自动重新获取"""
+    r = account._session.get(Url.GET_LOGIN_STATE)
+    data = r.json()
+    if data["result"] == "success":
         return account
+    # session过期
+    password = base64.b64decode(account._session.cookies["pwd"].encode()).decode()
+    account._session = get_session_by_captcha(account.username, password)
+    return account

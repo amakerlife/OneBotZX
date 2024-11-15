@@ -13,7 +13,6 @@ from config import message_config
 from filesystem import load_ban_list, save_ban_list, clean_cache_data, clean_cache_file
 from msg import send_private_message, send_private_file, send_private_img, approve_friend_request
 
-
 # Config Start
 chat_prefix = message_config.chat_prefix
 admins = message_config.admins
@@ -56,12 +55,14 @@ def process_queue(response):
 
     return response
 
+
 def should_limit():
     try:
         message = request.get_json().get("message", [])[0].get("data", {}).get("text", "")
     except Exception:
         return False
     return not message.startswith(chat_prefix)
+
 
 @app.route("/", methods=["POST"])
 @limiter.limit("20 per 5 minutes", exempt_when=should_limit)
@@ -96,6 +97,8 @@ def ratelimit_handler(e):
         send_private_message(sender_id, "因多次触发请求频率限制，已被封禁。请联系管理员。")
         logger.warning(f"{sender_id} has been banned due to frequent requests.")
     return '', 429
+
+
 # Flask Config End
 
 
@@ -134,7 +137,7 @@ def process_message(request_data):
                                                 f"{chat_prefix} help - 获取帮助信息\n"
                                                 f"\n提醒：提供的密码仅用于验证身份及获取数据。登录完成后您可以立即撤回密码。\n"
                                                 f"例如，使用 /zx login abcd 1234 来登录。\n"
-                                                f"若在日后使用时发现机器人状态为离线，请联系管理员 3372493336 解决。\n"
+                                                f"若在日后使用时发现机器人状态为离线，请联系管理员 {admins[0]} 解决。\n"
                                                 f"由于风控和请求数量限制，机器人可能需要至多 2 分钟来响应您的请求。\n"
                                                 f"使用本机器人即表示您同意遵守相关规定，并为使用本机器人的所有行为负责。")
                 if int(sender_id) in admins:
@@ -148,7 +151,7 @@ def process_message(request_data):
                 if int(sender_id) in super_users:
                     send_private_message(sender_id, f"欢迎您，高级用户 {sender_id}：\n"
                                                     f"{chat_prefix} sudo examxlsx <考试ID> - 获取考试成绩单\n")
-                                                    # f"{chat_prefix} sudo examanswersheet <id|name> <学生ID> <考试ID> - 获取考试答题卡\n")
+                    # f"{chat_prefix} sudo examanswersheet <id|name> <学生ID> <考试ID> - 获取考试答题卡\n")
                 return
 
             elif message.startswith("login"):
