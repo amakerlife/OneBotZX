@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -13,17 +17,19 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
       - name: Cache pip dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
-          path: ~/.cache/pip
+          path: |
+            ~/.cache/pip
+            C:\Users\runneradmin\AppData\Local\pip\Cache
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
@@ -35,23 +41,29 @@ jobs:
 
       - name: Build executable
         run: |
-          pyinstaller --onefile app.py
+          pyinstaller --onefile bot.py
+
+      - name: Install zip on Windows
+        if: runner.os == 'Windows'
+        run: choco install zip -y
 
       - name: Prepare release files
+        shell: bash
         run: |
           mkdir release
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            mv dist/app.exe release/
+            mv dist/bot.exe release/
           else
-            mv dist/app release/
+            mv dist/bot release/
           fi
           cp README.md release/
           cp config.example.yml release/
+          cp msyh.ttc release/
           cd release
           zip -r ../OneBotZX-${{ matrix.os }}.zip .
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: OneBotZX-${{ matrix.os }}.zip
           path: OneBotZX-${{ matrix.os }}.zip
@@ -61,27 +73,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
 
       - name: Create draft release
         uses: actions/create-release@v1
+        id: create-release
         with:
           tag_name: ${{ github.ref }}
           release_name: ${{ github.ref }}
           draft: true
           body: |
-            ## What's Changed:
+            What's Changed:
 
             ${{ github.event.head_commit.message }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload release assets
+      - name: Upload release asset for Linux
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: OneBotZX-*.zip
-          asset_name: OneBotZX-${{ matrix.os }}.zip
+          asset_path: OneBotZX-ubuntu-latest.zip/OneBotZX-ubuntu-latest.zip
+          asset_name: OneBotZX.linux.zip
+          asset_content_type: application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release asset for Windows
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: OneBotZX-windows-latest.zip/OneBotZX-windows-latest.zip
+          asset_name: OneBotZX.windows.zip
           asset_content_type: application/zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
