@@ -1,9 +1,11 @@
 import json
-from typing import List
+import re
 from time import sleep
-from loguru import logger
+from typing import List
 
+from loguru import logger
 from zhixuewang.teacher import TeacherAccount
+
 from answersheet import draw_answersheet
 from models import ZhixueError
 
@@ -160,6 +162,75 @@ def get_school_rank_by_stu_code(myaccount: TeacherAccount, examid: str, stu_code
     return subject_scores
 
 
+def calc_rank(student_list):
+    def parse_score(score_str):
+        if isinstance(score_str, (int, float)):
+            return float(score_str)
+
+        score_str = str(score_str)
+
+        # 提取数字
+        if "剔除" in score_str:
+            numbers = re.findall(r'-?\d+\.?\d*', score_str)
+            if numbers:
+                try:
+                    return float(numbers[0])
+                except ValueError:
+                    return -1
+            return -1
+
+        # 直接转换
+        try:
+            return float(score_str)
+        except (ValueError, TypeError):
+            return -1
+
+    # 按科目分组
+    subject_scores = {}
+    for student in student_list:
+        for subject_name, score_obj in student.scores.items():
+            if subject_name not in subject_scores:
+                subject_scores[subject_name] = []
+            subject_scores[subject_name].append((student, score_obj))
+
+    for subject_name, scores in subject_scores.items():
+        # 按班级分组
+        class_groups = {}
+        for student, score_obj in scores:
+            if student.class_name not in class_groups:
+                class_groups[student.class_name] = []
+            class_groups[student.class_name].append((student, score_obj))
+
+        # 计算年级排名
+        sorted_scores = sorted(scores, key=lambda x: parse_score(x[1].score), reverse=True)
+        current_rank = 1
+        prev_score = None
+        for i, (student, score_obj) in enumerate(sorted_scores):
+            current_score = parse_score(score_obj.score)
+            if current_score == -1:
+                score_obj.schoolrank = len(sorted_scores)
+            else:
+                if prev_score is not None and current_score != prev_score:
+                    current_rank = i + 1
+                score_obj.schoolrank = current_rank
+            prev_score = current_score
+
+        # 计算班级排名
+        for class_name, class_scores in class_groups.items():
+            sorted_class_scores = sorted(class_scores, key=lambda x: parse_score(x[1].score), reverse=True)
+            current_rank = 1
+            prev_score = None
+            for i, (student, score_obj) in enumerate(sorted_class_scores):
+                current_score = parse_score(score_obj.score)
+                if current_score == -1:
+                    score_obj.classrank = len(sorted_class_scores)
+                else:
+                    if prev_score is not None and current_score != prev_score:
+                        current_rank = i + 1
+                    score_obj.classrank = current_rank
+                prev_score = current_score
+
+
 def get_exam_all_rank(myaccount: TeacherAccount, examid: str) -> List:
     """
     获得全部成绩单
@@ -169,6 +240,7 @@ def get_exam_all_rank(myaccount: TeacherAccount, examid: str) -> List:
     Return:
         List: 成绩单
     """
+    logger.info(f"Getting exam data: {examid}")
     r = myaccount.get_session().post(
         "https://www.zhixue.com/api-teacher/api/studentScore/getAllSubjectStudentRank",
         data={
@@ -181,6 +253,7 @@ def get_exam_all_rank(myaccount: TeacherAccount, examid: str) -> List:
     pages = r.json()["result"]["paperInfo"]["totalPage"]
     subjects = get_exam_subjects(myaccount, examid)
     students_list = []
+    need_calc_rank = False
     for page in range(1, pages + 1):
         r = myaccount.get_session().post(
             "https://www.zhixue.com/api-teacher/api/studentScore/getAllSubjectStudentRank",
@@ -194,13 +267,16 @@ def get_exam_all_rank(myaccount: TeacherAccount, examid: str) -> List:
             student_info = StudentScoreInfo(student["userName"], student["userId"], student["studentLabel"],
                                             student["className"], student["allScore"], student["classRank"],
                                             student["schoolRank"])
+            if "-" in student["schoolRank"] or "-" in student["classRank"]:
+                need_calc_rank = True
             for score_info in student["scoreInfos"]:
                 subject_name = subjects[score_info["subjectCode"]]["name"]
                 student_info.add_subject_score(subject_name, score_info["score"], score_info["classRank"],
                                                score_info["schoolRank"], score_info["subjectCode"])
             students_list.append(student_info)
         sleep(0.5)
-        # logger.debug(f"Page {page}/{pages} done")
+    if need_calc_rank:
+        calc_rank(students_list)
     return students_list
 
 
@@ -230,7 +306,6 @@ def get_answersheet_data(myaccount: TeacherAccount, subjectid: str, stuid: str):
         raise ZhixueError(r.text)
 
     topic_mapping = data["markingTopicDetail"]  # 题号对应情况
-
     page_positions = {}  # 每页位置信息
     page_index_origin = 0
     for page in data["sheetDatas"]["answerSheetLocationDTO"]["pageSheets"]:
@@ -306,7 +381,6 @@ def get_answersheet_data(myaccount: TeacherAccount, subjectid: str, stuid: str):
             })
 
     sheet_images = data["sheetImages"]  # 原卷链接
-
     paper_type = json.loads(data["answerSheetLocation"])["paperType"]  # 纸张类型
 
     return topic_mapping, page_positions, objective_answer, answer_details, sheet_images, paper_type
