@@ -14,13 +14,13 @@ if not os.path.exists("./.zx/cache"):
 def save_cache(file: str, data):
     with open(f"./.zx/data/{file}.pkl", "wb") as f:
         pickle.dump(data, f)
-        logger.info(f"Successfully saved cache: {file}")
+        logger.success(f"Successfully saved cache: {file}")
 
 
 def load_cache(file: str, typ="dict"):
     try:
         with open(f"./.zx/data/{file}.pkl", "rb") as f:
-            logger.info(f"Successfully loaded cache: {file}")
+            logger.success(f"Successfully loaded cache: {file}")
             return pickle.load(f)
     except Exception as e:
         logger.error(f"Failed to load cache: {e}")
@@ -32,13 +32,13 @@ def load_cache(file: str, typ="dict"):
 def save_ban_list(ban_list):
     with open("./.zx/config/ban_list.pkl", "wb") as f:
         pickle.dump(ban_list, f)
-        logger.info("Successfully saved ban_list")
+        logger.success("Successfully saved ban_list")
 
 
 def load_ban_list():
     try:
         with open("./.zx/config/ban_list.pkl", "rb") as f:
-            logger.info("Successfully loaded ban_list")
+            logger.success("Successfully loaded ban_list")
             return pickle.load(f)
     except Exception as e:
         logger.error(f"Failed to load ban_list: {e}")

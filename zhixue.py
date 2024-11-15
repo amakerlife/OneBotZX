@@ -6,13 +6,12 @@ from loguru import logger
 from openpyxl import Workbook
 from zhixuewang.models import StuPerson
 
+from config import zhixue_config
+from filesystem import save_cache, load_cache
 from login import update_login_status_self, login_by_captcha
 from models import ZhixueError, LoginCaptchaError, FailedGetTeacherAccountError
-
-from filesystem import save_cache, load_cache
 from msg import send_private_message
 from teacher import get_exam_all_rank, get_exam_subjects, process_answersheet, get_stuid_by_stuname
-from config import zhixue_config
 
 teacher_usernames = zhixue_config.teacher_accounts
 teacher_passwords = zhixue_config.teacher_passwords
@@ -207,7 +206,7 @@ def get_exam_rank(qqid, exam_id: str):
     ws = wb.active
     subjects_list = get_exam_subjects(tch, exam_id)
     global exam_scores
-    exam_scores = load_cache("exam_scores", "list")
+    exam_scores = load_cache("exam_scores", "dict")
     if exam_id in exam_scores:
         students_scores_list = exam_scores[exam_id]
     else:

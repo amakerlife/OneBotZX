@@ -8,6 +8,7 @@ from config import onebot_config
 http_url = onebot_config.http_url
 access_token = onebot_config.access_token
 
+
 def truncate_string(s, length=30):
     if len(s) > length:
         return s[:length] + "..."
