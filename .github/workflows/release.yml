@@ -41,8 +41,7 @@ jobs:
 
       - name: Build executable
         run: |
-          mv ./onebotzx/*.py .
-          pyinstaller --onefile ./bot.py
+          pyinstaller --onefile ./onebotzx/bot.py -p ./onebotzx
 
       - name: Install zip on Windows
         if: runner.os == 'Windows'
