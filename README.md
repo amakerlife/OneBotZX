@@ -11,7 +11,7 @@
 
 
 
-对接 OneBot 标准 HTTP 的 Zhixue 机器人
+对接 OneBot 标准 HTTP 的智学网机器人
 
 ---
 
@@ -20,17 +20,17 @@
 ```bash
 git clone https://github.com/amakerlife/OneBotZX
 cd OneBotZX
-mv config.example.yml config.yml
-vim config.yml
+mv ./config/config.example.yml ./config/config.yml
+vim ./config/config.yml
 pip install -r requirements.txt
-python bot.py
+python ./onebotzx/bot.py
 ```
 
 ## Todo List
 
 - [ ] 重构 `send_message`
 - [ ] 正向 WebSocket 支持
-- [ ] 自定义字体文件路径
+- [x] 自定义字体文件路径
 - [ ] 各种操作失败提示
 - [ ] 管理员查看教师端考试列表
 - [ ] 支持为用户分配自定义权限（可能伴随着更改配置文件格式为 json）
