@@ -6,7 +6,7 @@ from loguru import logger
 from openpyxl import Workbook
 from zhixuewang.models import StuPerson
 
-from config.config_loader import zhixue_config
+from config_loader import zhixue_config
 from filesystem import save_cache, load_cache
 from login import update_login_status_self, login_by_captcha
 from models import ZhixueError, LoginCaptchaError, FailedGetTeacherAccountError

@@ -3,6 +3,7 @@ from io import BytesIO
 import requests
 from PIL import Image, ImageDraw, ImageFont
 
+from config_loader import assets_config
 from models import ZhixueError
 from config.config_loader import assets_config
 

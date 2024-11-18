@@ -11,10 +11,9 @@ from zhixuewang.student import StudentAccount
 from zhixuewang.teacher import TeacherAccount
 from zhixuewang.urls import Url
 
+import config_loader as config
 from models import LoginCaptchaError
 from msg import send_private_message
-
-import config.config_loader as config
 
 teacher_accounts = config.zhixue_config.teacher_accounts
 teacher_login_method = config.zhixue_config.teacher_login_method
