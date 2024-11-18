@@ -3,7 +3,7 @@ import json
 import requests
 from loguru import logger
 
-from config import onebot_config
+from config.config_loader import onebot_config
 
 http_url = onebot_config.http_url
 access_token = onebot_config.access_token

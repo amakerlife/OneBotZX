@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "OneBotZX"
+version = "1.0.1"
+description = "对接 OneBot11 标准 HTTP 的轻量智学网机器人"
+authors = ["amakerlife <64350662+amakerlife@users.noreply.github.com>"]
+license = "GPL-3.0"
+homepage = "https://github.com/amakerlife/OneBotZX"
+repository = "https://github.com/amakerlife/OneBotZX"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+Flask = "3.0.2"
+loguru = "0.7.2"
+PyYAML = "6.0.1"
+Requests = "2.32.2"
+zhixuewang = "1.2.7"
+openpyxl = "3.1.2"
+pillow = "11.0.0"
+Flask-Limiter = "3.8.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

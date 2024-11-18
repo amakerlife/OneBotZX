@@ -1,7 +1,7 @@
 import yaml
 from loguru import logger
 
-config_path = "config.yml"
+config_path = "config/config.yml"
 
 
 class ConfigError(Exception):
