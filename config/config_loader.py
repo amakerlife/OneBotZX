@@ -1,3 +1,5 @@
+import os
+
 import yaml
 from loguru import logger
 
@@ -31,6 +33,12 @@ class ZhixueConfig:
         self.teacher_login_method = teacher_login_method
         self.captcha_api = captcha_api
 
+class AssetsConfig:
+    def __init__(self, font_path: str):
+        self.font_path = font_path
+        if not os.path.exists(font_path) or not os.path.isfile(font_path):
+            raise ConfigError(f"No such file: {font_path}")
+
 
 with open(config_path, "r", encoding="utf-8") as file:
     config_data = yaml.safe_load(file)
@@ -39,6 +47,7 @@ try:
     onebot_config = OnebotConfig(**config_data.get("onebot", {}))
     message_config = MessageConfig(**config_data.get("message", {}))
     zhixue_config = ZhixueConfig(**config_data.get("zhixue", {}))
+    assets_config = AssetsConfig(**config_data.get("assets", {}))
     logger.success("Config loaded successfully")
 except Exception as e:
     logger.critical(f"FATAL ERROR: Failed to load config: {e}")

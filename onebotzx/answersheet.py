@@ -4,7 +4,9 @@ import requests
 from PIL import Image, ImageDraw, ImageFont
 
 from models import ZhixueError
+from config.config_loader import assets_config
 
+font_path = assets_config.font_path
 
 def get_size(text, font):
     left, top, right, bottom = font.getbbox(text, "utf-8")
@@ -62,7 +64,7 @@ def draw_answersheet(topic_mapping, page_positions, objective_answer, answer_det
         image = Image.open(BytesIO(response.content))
         image = image.convert("RGB")
         draw = ImageDraw.Draw(image)
-        font = ImageFont.truetype("msyh.ttc", 25, encoding="utf-8")
+        font = ImageFont.truetype(font_path, 25, encoding="utf-8")
 
         image_width, image_height = image.size
 
@@ -165,7 +167,7 @@ def draw_answersheet(topic_mapping, page_positions, objective_answer, answer_det
         standard_all_score += details["standardScore"]
 
     draw = ImageDraw.Draw(all_image)
-    font = ImageFont.truetype("msyh.ttc", 50, encoding="utf-8")
+    font = ImageFont.truetype(font_path, 50, encoding="utf-8")
     draw.text((10, 10), f"{all_score}/{standard_all_score}", fill="red", font=font)
     draw.text((10, 70), f"本答题卡数据仅供参考，具体以智学网分数为准", fill="blue", font=font)
     return all_image

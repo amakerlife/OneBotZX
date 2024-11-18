@@ -17,3 +17,6 @@ zhixue: # 智学网配置，可配置多个，一一对应
   teacher_login_method:
     - ""
   captcha_api: "" # 图形验证码 API
+
+assets:
+  font_path: "assets/msyh.ttc" # 用于答题卡的字体文件路径
