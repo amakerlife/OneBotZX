@@ -11,7 +11,7 @@ import zhixue
 from config_loader import message_config
 from filesystem import load_ban_list, save_ban_list, clean_cache_data, clean_cache_file
 from msg import send_private_message, send_private_file, send_private_img, approve_friend_request
-from onebotzx.models import CommandError
+from models import CommandError
 
 # Config Start
 chat_prefix = message_config.chat_prefix
