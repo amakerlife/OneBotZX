@@ -29,7 +29,7 @@ python ./onebotzx/bot.py
 
 ## Todo List
 
-- [ ] 重构 `send_message`
+- [x] 重构 `send_message`
 - [ ] 正向 WebSocket 支持
 - [x] 自定义字体文件路径
 - [x] 各种操作失败提示

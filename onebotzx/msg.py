@@ -16,6 +16,42 @@ def truncate_string(s, length=30):
         return s
 
 
+def send_request(url, headers, data, content, msg_type = "message"):
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+    if response.status_code == 200:
+        result = response.json()
+        if result["status"] == "ok":
+            if msg_type == "message":
+                logger.success(f"Successfully sent message: {truncate_string(content)}")
+            elif msg_type == "image":
+                logger.success(f"Successfully sent image: {content}")
+            elif msg_type == "file":
+                logger.success(f"Successfully sent file: {content}")
+            elif msg_type == "friend_request":
+                logger.success(f"Successfully approved friend request: {content}")
+            return True
+        else:
+            if msg_type == "message":
+                logger.error(f"Failed to send message, response: {str(result)}")
+            elif msg_type == "image":
+                logger.error(f"Failed to send image, response: {str(result)}")
+            elif msg_type == "file":
+                logger.error(f"Failed to send file, response: {str(result)}")
+            elif msg_type == "friend_request":
+                logger.error(f"Failed to approve friend request, response: {str(result)}")
+            return False
+    else:
+        if msg_type == "message":
+            logger.error(f"Failed to send message, status code: {str(response.status_code)}")
+        elif msg_type == "image":
+            logger.error(f"Failed to send image, status code: {str(response.status_code)}")
+        elif msg_type == "file":
+            logger.error(f"Failed to send file, status code: {str(response.status_code)}")
+        elif msg_type == "friend_request":
+            logger.error(f"Failed to approve friend request, status code: {str(response.status_code)}")
+        return False
+
+
 def approve_friend_request(flag, approve=True):
     url = f"{http_url}/set_friend_add_request"
     headers = {
@@ -26,18 +62,7 @@ def approve_friend_request(flag, approve=True):
         "flag": flag,
         "approve": approve
     }
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    if response.status_code == 200:
-        result = response.json()
-        if result["status"] == "ok":
-            logger.success(f"Successfully approved friend request: {flag}")
-            return True
-        else:
-            logger.error(f"Failed to approve friend request, response: {str(result)}")
-            return False
-    else:
-        logger.error(f"Failed to approve friend request, status code: {str(response.status_code)}")
-        return False
+    return send_request(url, headers, data, flag, "friend_request")
 
 
 def send_private_message(user_id, content):
@@ -55,18 +80,7 @@ def send_private_message(user_id, content):
             }
         ]
     }
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    if response.status_code == 200:
-        result = response.json()
-        if result["status"] == "ok":
-            logger.success(f"Successfully sent message: {truncate_string(content)}")
-            return True
-        else:
-            logger.error(f"Failed to send message, response: {str(result)}")
-            return False
-    else:
-        logger.error(f"Failed to send message, status code: {str(response.status_code)}")
-        return False
+    return send_request(url, headers, data, content)
 
 
 def send_group_message(group_id, sender_id, content):
@@ -88,18 +102,7 @@ def send_group_message(group_id, sender_id, content):
             }
         ]
     }
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    if response.status_code == 200:
-        result = response.json()
-        if result["status"] == "ok":
-            logger.success(f"Successfully sent message: {truncate_string(content)}")
-            return True
-        else:
-            logger.error(f"Failed to send message, response: {str(result)}")
-            return False
-    else:
-        logger.error(f"Failed to send message, status code: {str(response.status_code)}")
-        return False
+    return send_request(url, headers, data, content)
 
 
 def send_private_img(user_id, content):
@@ -117,18 +120,7 @@ def send_private_img(user_id, content):
             }
         ]
     }
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    if response.status_code == 200:
-        result = response.json()
-        if result["status"] == "ok":
-            logger.success(f"Successfully sent image: {content}")
-            return True
-        else:
-            logger.error(f"Failed to send image, response: {str(result)}")
-            return False
-    else:
-        logger.error(f"Failed to send image, status code: {str(response.status_code)}")
-        return False
+    return send_request(url, headers, data, content, "image")
 
 
 def send_group_img(group_id, sender_id, content):
@@ -150,18 +142,7 @@ def send_group_img(group_id, sender_id, content):
             }
         ]
     }
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    if response.status_code == 200:
-        result = response.json()
-        if result["status"] == "ok":
-            logger.success(f"Successfully sent message: {content}")
-            return True
-        else:
-            logger.error(f"Failed to send message, response: {str(result)}")
-            return False
-    else:
-        logger.error(f"Failed to send message, status code: {str(response.status_code)}")
-        return False
+    return send_request(url, headers, data, content, "image")
 
 
 def send_private_file(user_id, file_path):
@@ -182,15 +163,4 @@ def send_private_file(user_id, file_path):
             }
         ]
     }
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    if response.status_code == 200:
-        result = response.json()
-        if result["status"] == "ok":
-            logger.success(f"Successfully sent file: {file_path}")
-            return True
-        else:
-            logger.error(f"Failed to send file, response: {str(result)}")
-            return False
-    else:
-        logger.error(f"Failed to send file, status code: {str(response.status_code)}")
-        return False
+    return send_request(url, headers, data, file_path, "file")
