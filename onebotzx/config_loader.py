@@ -48,7 +48,7 @@ try:
     message_config = MessageConfig(**config_data.get("message", {}))
     zhixue_config = ZhixueConfig(**config_data.get("zhixue", {}))
     assets_config = AssetsConfig(**config_data.get("assets", {}))
-    logger.success("Config loaded successfully")
+    logger.success("Successfully loaded config")
 except Exception as e:
     logger.critical(f"FATAL ERROR: Failed to load config: {e}")
     raise ConfigError(f"Failed to load config: {e}")

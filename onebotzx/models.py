@@ -8,3 +8,7 @@ class LoginCaptchaError(Exception):
 
 class FailedGetTeacherAccountError(Exception):
     pass
+
+
+class CommandError(Exception):
+    pass

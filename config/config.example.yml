@@ -6,6 +6,8 @@ message:
   chat_prefix: "" # 命令前缀
   admins:
     - 0 # 管理员 QQ 号，可配置多个
+  super_users:
+    - 0 # 超级用户 QQ 号，可配置多个（这将在不远的未来更新为详细的权限配置）
   reply_limit: 1 # 消息回复时间间隔限制，默认为 1
   max_reply: 0 # 达到该次数后将用户封禁，默认 0 不封禁
 
