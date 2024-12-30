@@ -10,7 +10,7 @@ repository = "https://github.com/amakerlife/OneBotZX"
 [tool.poetry.dependencies]
 python = "^3.9"
 Flask = "3.0.2"
-loguru = "0.7.2"
+loguru = "0.7.3"
 PyYAML = "6.0.1"
 Requests = "2.32.2"
 zhixuewang = "1.2.7"
