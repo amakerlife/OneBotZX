@@ -1,0 +1,72 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            C:\Users\runneradmin\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build executable
+        run: |
+          pyinstaller --onefile ./onebotzx/bot.py -p ./onebotzx
+
+      - name: Install zip on Windows
+        if: runner.os == 'Windows'
+        run: choco install zip -y
+
+      - name: Prepare release files
+        shell: bash
+        run: |
+          mkdir release
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            mv dist/bot.exe release/
+          else
+            mv dist/bot release/
+          fi
+          cp README.md release/
+          cp config release/ -r
+          cp assets release/ -r
+          cd release
+          zip -r ../OneBotZX-${{ matrix.os }}.zip .
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: OneBotZX-${{ matrix.os }}.zip
+          path: OneBotZX-${{ matrix.os }}.zip
