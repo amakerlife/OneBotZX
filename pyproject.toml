@@ -9,7 +9,7 @@ description = "对接 OneBot11 标准 HTTP 的轻量智学网机器人"
 authors = [
     { name = "amakerlife", email = "64350662+amakerlife@users.noreply.github.com" }
 ]
-license = "GPL-3.0"
+license = { text = "GPL-3.0" }
 homepage = "https://github.com/amakerlife/OneBotZX"
 repository = "https://github.com/amakerlife/OneBotZX"
 dependencies = [
