@@ -23,8 +23,8 @@ git clone https://github.com/amakerlife/OneBotZX
 cd OneBotZX
 mv ./config/config.example.yml ./config/config.yml
 vim ./config/config.yml
-pip install -r requirements.txt
-python ./onebotzx/bot.py
+pip install .
+python ./src/OneBotZX/bot.py
 ```
 
 ## Todo List
@@ -37,7 +37,6 @@ python ./onebotzx/bot.py
 - [ ] 支持为用户分配自定义权限（可能伴随着更改配置文件格式为 json）
 - [ ] 支持查看题目答案
 - [ ] 支持教师账号管理命令
-- [ ] 学生密码加密
 
 ## 提示
 

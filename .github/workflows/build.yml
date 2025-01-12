@@ -33,22 +33,18 @@ jobs:
           path: |
             ~/.cache/pip
             C:\Users\runneradmin\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install .
           pip install pyinstaller
 
       - name: Build executable
         run: |
-          pyinstaller --onefile ./onebotzx/bot.py -p ./onebotzx
-
-      - name: Install zip on Windows
-        if: runner.os == 'Windows'
-        run: choco install zip -y
+          pyinstaller --onefile ./src/OneBotZX/bot.py
 
       - name: Prepare release files
         shell: bash
@@ -62,8 +58,12 @@ jobs:
           cp README.md release/
           cp config release/ -r
           cp assets release/ -r
-          cd release
-          zip -r ../OneBotZX-${{ matrix.os }}.zip .
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            powershell Compress-Archive -Path release\* -DestinationPath OneBotZX-${{ matrix.os }}.zip
+          else
+            cd release
+            zip -r ../OneBotZX-${{ matrix.os }}.zip .
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
