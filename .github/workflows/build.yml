@@ -44,7 +44,7 @@ jobs:
 
       - name: Build executable
         run: |
-          pyinstaller --onefile ./src/OneBotZX/bot.py
+          pyinstaller --onefile ./src/OneBotZX/bot.py -i "NONE"
 
       - name: Prepare release files
         shell: bash
